@@ -1,0 +1,619 @@
+/* Daily Fuel Log tracker — ported from the HTML prototype, same visual design. */
+.tracker-root {
+  --bg: #17171a;
+  --surface: #211f22;
+  --surface-alt: #2a2729;
+  --line: #3a3733;
+  --text: #f2ede2;
+  --text-muted: #9b9488;
+  --protein: #e8b94a;
+  --carbs: #4e9e94;
+  --fat: #c5644a;
+  --cal: #f2ede2;
+  --workout: #c9e265;
+  --danger: #c5644a;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-work-sans), -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+.tracker-root * {
+  box-sizing: border-box;
+}
+.tracker-root .display {
+  font-family: var(--font-bebas-neue), sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.tracker-root .app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 18px 16px 60px;
+}
+
+/* ---- Top bar ---- */
+.tracker-root .topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tracker-root .brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.tracker-root .brand .display {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--text);
+}
+.tracker-root .brand .tag {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tracker-root .view-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.tracker-root .view-toggle a {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.tracker-root .view-toggle a.active {
+  background: var(--protein);
+  color: #241c05;
+}
+
+/* ---- Date nav ---- */
+.tracker-root .datenav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+}
+.tracker-root .datenav button.arrow {
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  color: var(--text);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+}
+.tracker-root .datenav input[type="date"] {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+}
+.tracker-root .datenav .today-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.tracker-root .datenav button.today-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+/* ---- Scoreboard ---- */
+.tracker-root .scoreboard {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.tracker-root .score-tile {
+  background: var(--surface);
+  padding: 14px 14px 12px;
+}
+.tracker-root .score-tile .val {
+  font-family: var(--font-bebas-neue), sans-serif;
+  font-size: 34px;
+  line-height: 1;
+}
+.tracker-root .score-tile .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.tracker-root .score-tile .target {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.tracker-root .score-tile .bar-track {
+  height: 3px;
+  background: var(--line);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.tracker-root .score-tile .bar-fill {
+  height: 100%;
+}
+.tracker-root .score-tile.cal .bar-fill {
+  background: var(--cal);
+}
+.tracker-root .score-tile.protein .bar-fill {
+  background: var(--protein);
+}
+.tracker-root .score-tile.carbs .bar-fill {
+  background: var(--carbs);
+}
+.tracker-root .score-tile.fat .bar-fill {
+  background: var(--fat);
+}
+.tracker-root .score-tile.cal .val {
+  color: var(--cal);
+}
+.tracker-root .score-tile.protein {
+  border-bottom: 3px solid var(--protein);
+}
+.tracker-root .score-tile.protein .val {
+  color: var(--protein);
+}
+.tracker-root .score-tile.carbs {
+  border-bottom: 3px solid var(--carbs);
+}
+.tracker-root .score-tile.carbs .val {
+  color: var(--carbs);
+}
+.tracker-root .score-tile.fat {
+  border-bottom: 3px solid var(--fat);
+}
+.tracker-root .score-tile.fat .val {
+  color: var(--fat);
+}
+
+/* ---- Meal sections ---- */
+.tracker-root .section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+.tracker-root .section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+.tracker-root .section-head .name {
+  font-family: var(--font-bebas-neue), sans-serif;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+.tracker-root .section-head .time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.tracker-root .section.workout .section-head {
+  border-left: 3px solid var(--workout);
+}
+.tracker-root .section.workout .section-head .name {
+  color: var(--workout);
+}
+
+.tracker-root .items {
+  padding: 4px 14px;
+}
+.tracker-root .item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+.tracker-root .item-row:last-child {
+  border-bottom: none;
+}
+.tracker-root .item-row .iname {
+  flex: 1.4;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tracker-root .item-row .iqty {
+  color: var(--text-muted);
+  width: 78px;
+  text-align: right;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+.tracker-root .item-row .imacro {
+  width: 54px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .item-row .imacro.protein {
+  color: var(--protein);
+}
+.tracker-root .item-row .imacro.carbs {
+  color: var(--carbs);
+}
+.tracker-root .item-row .imacro.fat {
+  color: var(--fat);
+}
+.tracker-root .item-row .rm {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  width: 22px;
+  flex-shrink: 0;
+  padding: 0;
+}
+.tracker-root .item-row .rm:hover {
+  color: var(--danger);
+}
+.tracker-root .item-head-row {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0 4px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .item-head-row span:first-child {
+  flex: 1.4;
+}
+.tracker-root .item-head-row span {
+  width: 54px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.tracker-root .item-head-row span.q {
+  width: 78px;
+}
+.tracker-root .item-head-row span.sp {
+  width: 22px;
+}
+.tracker-root .empty-row {
+  padding: 12px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.tracker-root .add-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0 4px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.tracker-root .add-row input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.tracker-root .add-row .food-wrap {
+  position: relative;
+  flex: 1.6;
+  min-width: 160px;
+}
+.tracker-root .add-row input.food {
+  width: 100%;
+}
+.tracker-root .add-row input.qty {
+  width: 62px;
+}
+.tracker-root .unit-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.tracker-root .unit-toggle button {
+  background: var(--bg);
+  border: none;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 8px 9px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tracker-root .unit-toggle button.active {
+  background: var(--carbs);
+  color: #0e1f1c;
+}
+.tracker-root .add-row input.conv {
+  width: 66px;
+}
+.tracker-root .weight-hint {
+  width: 100%;
+  font-size: 11px;
+  color: var(--carbs);
+  padding: 4px 0 0;
+}
+.tracker-root .weight-hint a {
+  color: var(--protein);
+  text-decoration: underline;
+  margin-left: 4px;
+}
+.tracker-root .add-row button.add-btn {
+  background: var(--protein);
+  border: none;
+  color: #241c05;
+  font-weight: 700;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tracker-root .add-row button.add-btn:hover {
+  opacity: 0.9;
+}
+.tracker-root .add-row button.add-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tracker-root .search-hint {
+  width: 100%;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  padding: 0 0 8px;
+}
+
+.tracker-root .suggest-box {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  max-height: 220px;
+  overflow-y: auto;
+}
+.tracker-root .suggest-item {
+  padding: 8px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tracker-root .suggest-item:last-child {
+  border-bottom: none;
+}
+.tracker-root .suggest-item:hover {
+  background: var(--surface);
+}
+.tracker-root .suggest-item .sname {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tracker-root .suggest-item .smeta {
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.tracker-root .suggest-item .stag {
+  font-size: 9px;
+  color: var(--carbs);
+  border: 1px solid var(--carbs);
+  padding: 1px 4px;
+  margin-left: 6px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.tracker-root .suggest-loading {
+  padding: 8px 10px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.tracker-root .custom-panel {
+  display: flex;
+  gap: 8px;
+  padding: 0 0 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1px dashed var(--line);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+.tracker-root .custom-panel .hint {
+  width: 100%;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.tracker-root .custom-panel input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 7px 8px;
+  font-size: 12.5px;
+  width: 78px;
+  font-family: inherit;
+}
+.tracker-root .custom-panel button {
+  background: var(--carbs);
+  border: none;
+  color: #0e1f1c;
+  font-weight: 700;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tracker-root .section-total {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 8px 14px;
+  background: var(--surface-alt);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.tracker-root .section-total b {
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .section-total .p b {
+  color: var(--protein);
+}
+.tracker-root .section-total .c b {
+  color: var(--carbs);
+}
+.tracker-root .section-total .f b {
+  color: var(--fat);
+}
+
+.tracker-root .day-actions {
+  text-align: center;
+  margin-top: 10px;
+}
+.tracker-root .day-actions button {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+.tracker-root .day-actions button:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.tracker-root .save-note {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  min-height: 14px;
+}
+
+/* ---- History view ---- */
+.tracker-root .history {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 16px;
+}
+.tracker-root .hist-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.tracker-root .hist-nav .display {
+  font-size: 24px;
+}
+.tracker-root .hist-nav a.nav-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  color: var(--text);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tracker-root .cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.tracker-root .cal-dow {
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding-bottom: 4px;
+}
+.tracker-root .cal-day {
+  aspect-ratio: 1;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+.tracker-root .cal-day:hover {
+  border-color: var(--protein);
+}
+.tracker-root .cal-day.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+.tracker-root .cal-day.has-data {
+  border-color: var(--protein);
+}
+.tracker-root .cal-day .dnum {
+  font-weight: 600;
+}
+.tracker-root .cal-day .dcal {
+  font-size: 9px;
+  color: var(--protein);
+  margin-top: 2px;
+}
+.tracker-root .cal-day.today-cell {
+  outline: 2px solid var(--carbs);
+  outline-offset: -2px;
+}
+
+@media (max-width: 520px) {
+  .tracker-root .scoreboard {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tracker-root .brand .display {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,81 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getEntriesForDate, getCustomFoods, getBodyTargets } from "@/lib/db";
+import { totalsForEntries, round1, todayStr } from "@/lib/nutrition";
+import { SECTIONS } from "@/lib/food-db";
+import Topbar from "@/components/tracker/Topbar";
+import DateNav from "@/components/tracker/DateNav";
+import MealSection from "@/components/tracker/MealSection";
+import ClearDayButton from "@/components/tracker/ClearDayButton";
+import ScoreTile from "@/components/tracker/ScoreTile";
+import "./tracker.css";
+
+export default async function Home(props: PageProps<"/">) {
+  const searchParams = await props.searchParams;
+  const date = typeof searchParams.date === "string" ? searchParams.date : todayStr();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const [entries, customFoods, targets] = await Promise.all([
+    getEntriesForDate(supabase, user.id, date),
+    getCustomFoods(supabase, user.id),
+    getBodyTargets(supabase, user.id),
+  ]);
+
+  const totals = totalsForEntries(entries);
+
+  return (
+    <div className="tracker-root">
+      <div className="app">
+        <Topbar active="tracker" userEmail={user.email} />
+        <DateNav date={date} />
+
+        <div className="scoreboard">
+          <ScoreTile
+            cls="cal"
+            label="Calories"
+            value={Math.round(totals.cal)}
+            target={targets?.target_calories}
+          />
+          <ScoreTile
+            cls="protein"
+            label="Protein"
+            value={round1(totals.protein)}
+            unit="g"
+            target={targets?.target_protein}
+          />
+          <ScoreTile
+            cls="carbs"
+            label="Carbs"
+            value={round1(totals.carbs)}
+            unit="g"
+            target={targets?.target_carbs}
+          />
+          <ScoreTile
+            cls="fat"
+            label="Fat"
+            value={round1(totals.fat)}
+            unit="g"
+            target={targets?.target_fat}
+          />
+        </div>
+
+        {SECTIONS.map((section) => (
+          <MealSection
+            key={section.key}
+            section={section}
+            items={entries[section.key]}
+            date={date}
+            customFoods={customFoods}
+          />
+        ))}
+
+        <ClearDayButton date={date} />
+      </div>
+    </div>
+  );
+}

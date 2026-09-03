@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Fuel Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #17171a;
+    --surface: #211f22;
+    --surface-alt: #2a2729;
+    --line: #3a3733;
+    --text: #f2ede2;
+    --text-muted: #9b9488;
+    --protein: #e8b94a;
+    --carbs: #4e9e94;
+    --fat: #c5644a;
+    --cal: #f2ede2;
+    --workout: #c9e265;
+    --danger: #c5644a;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display{ font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.5px; }
+
+  .app{ max-width: 880px; margin: 0 auto; padding: 18px 16px 60px; }
+
+  /* ---- Top bar ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content: space-between;
+    margin-bottom: 18px; gap: 10px; flex-wrap: wrap;
+  }
+  .storage-banner{
+    background: #3a2c1a; border: 1px solid var(--fat); color: #f0d9c8;
+    font-size: 11.5px; padding: 8px 12px; margin-bottom: 12px; line-height: 1.4;
+  }
+  .brand{ display:flex; align-items: baseline; gap: 10px; }
+  .brand .display{ font-size: 34px; line-height: 1; color: var(--text); }
+  .brand .tag{ font-size: 12px; color: var(--text-muted); }
+
+  .view-toggle{ display:flex; background: var(--surface); border: 1px solid var(--line); }
+  .view-toggle button{
+    background: transparent; border: none; color: var(--text-muted);
+    font-family: 'Work Sans'; font-weight: 600; font-size: 13px;
+    padding: 9px 16px; cursor: pointer;
+  }
+  .view-toggle button.active{ background: var(--protein); color: #241c05; }
+
+  /* ---- Date nav ---- */
+  .datenav{
+    display:flex; align-items:center; gap: 10px; margin-bottom: 20px;
+    background: var(--surface); border: 1px solid var(--line); padding: 10px 12px;
+  }
+  .datenav button.arrow{
+    background: var(--surface-alt); border: 1px solid var(--line); color: var(--text);
+    width: 32px; height: 32px; cursor: pointer; font-size: 15px; font-family: inherit;
+  }
+  .datenav input[type=date]{
+    background: transparent; border: none; color: var(--text); font-family: 'Work Sans';
+    font-weight: 600; font-size: 15px; flex: 1; min-width: 0;
+  }
+  .datenav .today-label{ font-size: 12px; color: var(--text-muted); }
+  .datenav button.today-btn{
+    background: transparent; border: 1px solid var(--line); color: var(--text-muted);
+    padding: 6px 10px; font-size: 12px; cursor: pointer; font-family: 'Work Sans'; font-weight: 600;
+  }
+
+  /* ---- Scoreboard ---- */
+  .scoreboard{
+    display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 1px;
+    background: var(--line); border: 1px solid var(--line); margin-bottom: 22px;
+  }
+  .score-tile{ background: var(--surface); padding: 14px 14px 12px; }
+  .score-tile .val{ font-family: 'Bebas Neue'; font-size: 34px; line-height: 1; }
+  .score-tile .lbl{ font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+  .score-tile.cal .val{ color: var(--cal); }
+  .score-tile.protein{ border-bottom: 3px solid var(--protein); }
+  .score-tile.protein .val{ color: var(--protein); }
+  .score-tile.carbs{ border-bottom: 3px solid var(--carbs); }
+  .score-tile.carbs .val{ color: var(--carbs); }
+  .score-tile.fat{ border-bottom: 3px solid var(--fat); }
+  .score-tile.fat .val{ color: var(--fat); }
+
+  /* ---- Meal sections ---- */
+  .section{ background: var(--surface); border: 1px solid var(--line); margin-bottom: 14px; }
+  .section-head{
+    display:flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-alt);
+  }
+  .section-head .name{ font-family: 'Bebas Neue'; font-size: 19px; letter-spacing: 1px; }
+  .section-head .time{ font-size: 11px; color: var(--text-muted); }
+  .section.workout .section-head{ border-left: 3px solid var(--workout); }
+  .section.workout .section-head .name{ color: var(--workout); }
+
+  .items{ padding: 4px 14px; }
+  .item-row{
+    display:flex; align-items:center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .item-row:last-child{ border-bottom: none; }
+  .item-row .iname{ flex: 1.4; min-width: 0; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item-row .iqty{ color: var(--text-muted); width: 78px; text-align: right; flex-shrink:0; font-size: 11.5px; line-height: 1.25; }
+  .item-row .imacro{ width: 54px; text-align: right; flex-shrink:0; font-variant-numeric: tabular-nums; }
+  .item-row .imacro.protein{ color: var(--protein); }
+  .item-row .imacro.carbs{ color: var(--carbs); }
+  .item-row .imacro.fat{ color: var(--fat); }
+  .item-row .rm{
+    background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px;
+    width: 22px; flex-shrink: 0; padding:0;
+  }
+  .item-row .rm:hover{ color: var(--danger); }
+  .item-head-row{ display:flex; gap:10px; padding: 6px 0 4px; font-size: 10.5px; color: var(--text-muted); font-weight:600; border-bottom: 1px solid var(--line);}
+  .item-head-row span:first-child{ flex: 1.4; }
+  .item-head-row span{ width: 54px; text-align:right; flex-shrink:0; }
+  .item-head-row span.q{ width:78px; }
+  .item-head-row span.sp{ width:22px; }
+  .empty-row{ padding: 12px 0; color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+  .add-row{ display:flex; gap: 8px; padding: 10px 0 4px; flex-wrap: wrap; position: relative; }
+  .add-row input{
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+    padding: 8px 10px; font-family: 'Work Sans'; font-size: 13px;
+  }
+  .add-row .food-wrap{ position: relative; flex: 1.6; min-width: 160px; }
+  .add-row input.food{ width: 100%; }
+  .add-row input.qty{ width: 62px; }
+  .unit-toggle{ display:flex; border: 1px solid var(--line); flex-shrink: 0; }
+  .unit-toggle button{
+    background: var(--bg); border: none; color: var(--text-muted); font-family: 'Work Sans';
+    font-size: 11.5px; font-weight: 600; padding: 8px 9px; cursor: pointer;
+  }
+  .unit-toggle button.active{ background: var(--carbs); color: #0e1f1c; }
+  .unit-toggle.hidden{ display: none; }
+  .add-row input.conv{ width: 66px; }
+  .add-row input.conv.hidden{ display: none; }
+  .weight-hint{
+    display: none; width: 100%; font-size: 11px; color: var(--carbs); padding: 4px 0 0;
+  }
+  .weight-hint a{ color: var(--protein); text-decoration: underline; margin-left: 4px; }
+  .add-row button.add-btn{
+    background: var(--protein); border: none; color: #241c05; font-weight: 700;
+    padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Work Sans';
+  }
+  .add-row button.add-btn:hover{ opacity: 0.9; }
+  .search-hint{ width:100%; font-size: 10.5px; color: var(--text-muted); padding: 0 0 8px; }
+
+  .suggest-box{
+    position: absolute; top: calc(100% + 2px); left: 0; right: 0; z-index: 20;
+    background: var(--surface-alt); border: 1px solid var(--line); max-height: 220px;
+    overflow-y: auto; display: none;
+  }
+  .suggest-box.show{ display: block; }
+  .suggest-item{
+    padding: 8px 10px; font-size: 12.5px; cursor: pointer; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  .suggest-item:last-child{ border-bottom: none; }
+  .suggest-item:hover, .suggest-item.hi{ background: var(--surface); }
+  .suggest-item .sname{ flex: 1; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .suggest-item .smeta{ color: var(--text-muted); font-size: 11px; flex-shrink:0; }
+  .suggest-item .stag{ font-size: 9px; color: var(--carbs); border: 1px solid var(--carbs); padding: 1px 4px; margin-left: 6px; flex-shrink:0; align-self:center; }
+  .suggest-loading{ padding: 8px 10px; font-size: 11.5px; color: var(--text-muted); }
+
+  .custom-panel{
+    display:none; gap: 8px; padding: 0 0 12px; flex-wrap: wrap; align-items:center;
+    border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 10px;
+  }
+  .custom-panel.show{ display:flex; }
+  .custom-panel .hint{ width: 100%; font-size: 11.5px; color: var(--text-muted); margin-bottom: 2px; }
+  .custom-panel input{
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+    padding: 7px 8px; font-family: 'Work Sans'; font-size: 12.5px; width: 78px;
+  }
+  .custom-panel button{
+    background: var(--carbs); border:none; color: #0e1f1c; font-weight:700; padding: 7px 14px;
+    font-size: 12.5px; cursor:pointer; font-family: 'Work Sans';
+  }
+
+  .section-total{
+    display:flex; justify-content: flex-end; gap: 16px; padding: 8px 14px;
+    background: var(--surface-alt); border-top: 1px solid var(--line); font-size: 12px;
+  }
+  .section-total b{ font-variant-numeric: tabular-nums; }
+  .section-total .p b{ color: var(--protein); }
+  .section-total .c b{ color: var(--carbs); }
+  .section-total .f b{ color: var(--fat); }
+
+  .day-actions{ text-align:center; margin-top: 10px; }
+  .day-actions button{
+    background: transparent; border: 1px solid var(--line); color: var(--text-muted);
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer; font-family: 'Work Sans'; font-weight: 600;
+  }
+  .day-actions button:hover{ border-color: var(--danger); color: var(--danger); }
+
+  .save-note{ text-align:center; font-size: 11.5px; color: var(--text-muted); margin-top: 8px; min-height: 14px; }
+
+  /* ---- History view ---- */
+  .history{ background: var(--surface); border: 1px solid var(--line); padding: 16px; }
+  .hist-nav{ display:flex; align-items:center; justify-content: space-between; margin-bottom: 14px; }
+  .hist-nav .display{ font-size: 24px; }
+  .hist-nav button{
+    background: var(--surface-alt); border: 1px solid var(--line); color: var(--text);
+    width: 30px; height: 30px; cursor:pointer; font-family: inherit;
+  }
+  .cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow{ text-align:center; font-size: 10.5px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; }
+  .cal-day{
+    aspect-ratio: 1; background: var(--surface-alt); border: 1px solid var(--line);
+    display:flex; flex-direction: column; align-items:center; justify-content:center;
+    cursor: pointer; position: relative; font-size: 12px;
+  }
+  .cal-day:hover{ border-color: var(--protein); }
+  .cal-day.empty{ background: transparent; border: none; cursor: default; }
+  .cal-day.has-data{ border-color: var(--protein); }
+  .cal-day .dnum{ font-weight: 600; }
+  .cal-day .dcal{ font-size: 9px; color: var(--protein); margin-top: 2px; }
+  .cal-day.today-cell{ outline: 2px solid var(--carbs); outline-offset: -2px; }
+
+  .loading{ text-align:center; padding: 40px 0; color: var(--text-muted); font-size: 13px; }
+
+  @media (max-width: 520px){
+    .scoreboard{ grid-template-columns: 1fr 1fr; }
+    .brand .display{ font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading" id="loadingMsg">Loading your log…</div>
+</div>
+
+<script>
+(function(){
+
+// ---------------- Food database (approx values per 100g, editable via custom foods) ----------------
+var FOOD_DB = {
+  "rice, cooked": [28,2.7,0.3,130],
+  "brown rice, cooked": [23,2.6,0.9,123],
+  "roti / chapati": [48,8,3.7,297],
+  "dal, cooked": [20,9,0.4,116],
+  "rajma, cooked": [23,9,0.5,127],
+  "chana, cooked": [27,9,2.6,164],
+  "chicken breast, cooked": [0,31,3.6,165],
+  "chicken curry": [5,15,8,150],
+  "egg, boiled": [1.1,13,11,155],
+  "egg white": [0.7,11,0.2,52],
+  "paneer": [3.4,18,20,265],
+  "curd / yogurt, plain": [4.7,3.5,3.3,61],
+  "milk, whole": [5,3.4,3.6,65],
+  "milk, toned": [5,3.4,1.5,50],
+  "oats, dry": [66,17,7,389],
+  "banana": [23,1.1,0.3,89],
+  "apple": [14,0.3,0.2,52],
+  "almonds": [22,21,50,579],
+  "peanut butter": [20,25,50,588],
+  "peanuts": [16,26,49,567],
+  "whey protein powder": [8,80,7,400],
+  "sweet potato, boiled": [20,1.6,0.1,86],
+  "potato, boiled": [17,2,0.1,87],
+  "brown bread": [43,13,3.5,247],
+  "white bread": [49,9,3.2,265],
+  "salmon, cooked": [0,25,13,208],
+  "tuna, canned in water": [0,26,1,116],
+  "broccoli, cooked": [7,2.8,0.4,34],
+  "spinach, cooked": [3.6,2.9,0.4,23],
+  "avocado": [9,2,15,160],
+  "olive oil": [0,0,100,884],
+  "ghee": [0,0,100,900],
+  "butter": [0.1,0.9,81,717],
+  "cheddar cheese": [1.3,25,33,403],
+  "soybean, cooked": [9,17,9,173],
+  "tofu": [1.9,8,4.8,76],
+  "quinoa, cooked": [21,4.4,1.9,120],
+  "idli (2 pcs, ~100g)": [22,4,0.5,110],
+  "dosa, plain": [30,3,3.7,168],
+  "upma": [20,3,5,150],
+  "poha": [27,2.6,3.5,158],
+  "watermelon": [8,0.6,0.2,30],
+  "orange": [12,0.9,0.1,47],
+  "grapes": [18,0.6,0.3,69],
+  "mango": [15,0.8,0.4,60],
+  "dates": [75,2.5,0.4,282],
+  "walnuts": [14,15,65,654],
+  "cashews": [30,18,44,553],
+  "coconut, fresh": [15,3.3,33,354],
+  "protein bar, generic": [40,20,10,350],
+  "moong sprouts": [19,3,0.2,30],
+  "besan chilla": [15,7,5,140],
+  "mixed veg sabzi": [10,3,5,100],
+  "papad, roasted": [55,20,2,335],
+  "mutton curry": [4,18,12,190],
+  "fish curry": [4,17,8,155],
+
+  // ---- grains & cereals ----
+  "wheat flour (atta), raw": [72,12,1.7,340],
+  "semolina (rava), raw": [74,10,1,360],
+  "cornflakes": [84,7,0.4,357],
+  "muesli": [66,10,6,375],
+  "vermicelli, cooked": [25,3,0.3,120],
+  "millet (bajra), cooked": [23,3.5,1.3,119],
+  "ragi (finger millet) flour": [72,7,1.3,336],
+  "jowar (sorghum), cooked": [23,3,1,119],
+  "barley, cooked": [28,2.3,0.4,123],
+  "pasta, cooked": [25,5,1.1,131],
+  "bread, multigrain": [41,13,4,265],
+  "naan": [50,9,5,310],
+  "paratha, plain": [45,7,13,330],
+
+  // ---- legumes & pulses ----
+  "moong dal, cooked": [20,7,0.4,105],
+  "masoor dal, cooked": [20,9,0.4,116],
+  "urad dal, cooked": [20,8,0.5,105],
+  "black beans, cooked": [24,9,0.5,132],
+  "green peas, cooked": [14,5,0.4,84],
+
+  // ---- vegetables ----
+  "cauliflower, cooked": [5,2,0.5,25],
+  "carrot, raw": [10,0.9,0.2,41],
+  "tomato, raw": [3.9,0.9,0.2,18],
+  "onion, raw": [9,1.1,0.1,40],
+  "cucumber, raw": [3.6,0.7,0.1,15],
+  "bell pepper / capsicum": [6,1,0.3,31],
+  "green beans, cooked": [7,1.8,0.2,35],
+  "bitter gourd (karela)": [4,1,0.2,17],
+  "bottle gourd (lauki)": [3.4,0.6,0.1,14],
+  "okra (bhindi), cooked": [7,2,0.2,33],
+  "mushroom, cooked": [3.3,3.1,0.3,28],
+  "beetroot, boiled": [10,1.7,0.2,44],
+  "lettuce": [2.9,1.4,0.1,15],
+  "corn, boiled": [21,3.2,1.5,96],
+
+  // ---- fruits ----
+  "pineapple": [13,0.5,0.1,50],
+  "papaya": [11,0.5,0.3,43],
+  "guava": [14,2.6,1,68],
+  "strawberries": [8,0.7,0.3,32],
+  "pear": [15,0.4,0.1,57],
+  "kiwi": [15,1.1,0.5,61],
+  "pomegranate": [19,1.7,1.2,83],
+  "blueberries": [14,0.7,0.3,57],
+  "muskmelon": [8,0.8,0.2,34],
+  "sapota (chikoo)": [20,0.4,1.1,83],
+
+  // ---- non-veg protein ----
+  "prawns / shrimp, cooked": [0,24,0.3,99],
+  "turkey breast, cooked": [0,29,1,135],
+  "beef, lean, cooked": [0,26,15,250],
+  "pork, lean, cooked": [0,27,14,242],
+  "duck, cooked": [0,19,28,337],
+  "crab, cooked": [0,19,1.5,97],
+  "mackerel, cooked": [0,23,14,225],
+  "sardines, canned": [0,25,11,208],
+  "bacon, cooked": [1.4,37,42,541],
+  "sausage, chicken": [3,15,17,220],
+  "ham": [1.5,21,5,145],
+
+  // ---- dairy & eggs ----
+  "milk, skim": [5,3.4,0.1,34],
+  "buttermilk (chaas)": [3.6,3.1,0.9,40],
+  "cream cheese": [4,6,34,342],
+  "mozzarella": [2.2,22,22,300],
+  "ricotta": [3,11,13,174],
+  "greek yogurt": [3.6,10,0.4,59],
+  "egg yolk": [3.6,16,27,322],
+
+  // ---- nuts & seeds ----
+  "pistachios": [28,20,45,560],
+  "chia seeds": [42,17,31,486],
+  "flax seeds": [29,18,42,534],
+  "pumpkin seeds": [15,19,49,559],
+  "sunflower seeds": [20,21,51,584],
+  "hazelnuts": [17,15,61,628],
+
+  // ---- snacks & staples ----
+  "popcorn, air-popped": [78,13,5,387],
+  "potato chips": [53,6,35,536],
+  "dark chocolate": [46,7,31,546],
+  "granola": [64,10,15,471],
+  "honey": [82,0.3,0,304],
+  "jaggery": [98,0.4,0.1,383],
+  "sugar": [100,0,0,387],
+  "soy milk": [3,3.3,1.8,54],
+  "almond milk, unsweetened": [0.6,0.4,1.1,15],
+  "coconut milk": [3.3,2.3,24,230],
+  "hummus": [14,8,10,166],
+  "guacamole": [8,2,15,155],
+  "mayonnaise": [0.6,1,75,680],
+  "ketchup": [26,1.2,0.2,101],
+  "protein shake, ready-to-drink": [6,20,3,140]
+};
+
+var STORAGE_SHARED = false;
+
+// Average weight (g) for one typical piece/unit — used by the "pc" quantity mode so users
+// don't have to guess grams for countable foods. Values are standard averages (medium size).
+var PIECE_WEIGHTS = {
+  "apple": 182,
+  "banana": 118,
+  "orange": 131,
+  "mango": 200,
+  "egg, boiled": 50,
+  "egg white": 33,
+  "roti / chapati": 40,
+  "idli (2 pcs, ~100g)": 50,
+  "dosa, plain": 80,
+  "dates": 8,
+  "potato, boiled": 170,
+  "sweet potato, boiled": 130,
+  "besan chilla": 60,
+  "papad, roasted": 12
+};
+
+// Density (g per ml) — used by the "ml" quantity mode. Most liquids are close enough to
+// water (1.0) that this is a safe default; a few common exceptions are listed. Always editable.
+var DENSITIES = {
+  "milk, whole": 1.03,
+  "milk, toned": 1.03,
+  "curd / yogurt, plain": 1.03,
+  "olive oil": 0.92,
+  "ghee": 0.91,
+  "milk, skim": 1.03,
+  "buttermilk (chaas)": 1.01,
+  "soy milk": 1.02,
+  "almond milk, unsweetened": 1.01,
+  "coconut milk": 0.97,
+  "protein shake, ready-to-drink": 1.03,
+  "honey": 1.42,
+  "ketchup": 1.14,
+  "mayonnaise": 0.91
+};
+
+// ---------------- Sections config ----------------
+var SECTIONS = [
+  {key:"breakfast", label:"Breakfast", time:"~7:00 – 9:00 AM", workout:false},
+  {key:"midMorningSnack", label:"Mid-Morning Snack", time:"~11:00 AM", workout:false},
+  {key:"lunch", label:"Lunch", time:"~1:00 – 2:00 PM", workout:false},
+  {key:"eveningSnack", label:"Evening Snack", time:"~4:30 – 5:30 PM", workout:false},
+  {key:"preWorkout", label:"Pre-Workout", time:"~30–45 min before training", workout:true},
+  {key:"postWorkout", label:"Post-Workout", time:"within ~45 min after training", workout:true},
+  {key:"dinner", label:"Dinner", time:"~8:00 – 9:00 PM", workout:false}
+];
+
+// ---------------- State ----------------
+var state = {
+  view: "tracker",           // tracker | history
+  date: todayStr(),
+  entry: emptyEntry(),
+  customFoods: {},
+  histYear: null,
+  histMonth: null,           // 0-11
+  histIndex: {}              // "YYYY-MM-DD" -> total cal
+};
+
+function todayStr(){
+  var d = new Date();
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+}
+function pad(n){ return n < 10 ? "0"+n : ""+n; }
+function emptyEntry(){
+  var e = {};
+  SECTIONS.forEach(function(s){ e[s.key] = []; });
+  return e;
+}
+function allFoods(){
+  var merged = {};
+  Object.keys(FOOD_DB).forEach(function(k){ merged[k] = FOOD_DB[k]; });
+  Object.keys(state.customFoods).forEach(function(k){ merged[k] = state.customFoods[k]; });
+  return merged;
+}
+
+// ---------------- Storage I/O ----------------
+var storageAvailable = !!(typeof window !== "undefined" && window.storage &&
+  typeof window.storage.get === "function" && typeof window.storage.set === "function");
+
+async function withRetry(fn, retries){
+  retries = retries === undefined ? 2 : retries;
+  var lastErr;
+  for(var i=0; i<=retries; i++){
+    try{ return await fn(); }
+    catch(e){
+      lastErr = e;
+      if(i < retries) await new Promise(function(r){ setTimeout(r, 350*(i+1)); });
+    }
+  }
+  throw lastErr;
+}
+async function loadCustomFoods(){
+  if(!storageAvailable) return;
+  try{
+    var res = await window.storage.get("customFoods", STORAGE_SHARED);
+    if(res && res.value){ state.customFoods = JSON.parse(res.value); }
+  }catch(e){ /* key not found or error - keep default */ }
+}
+async function saveCustomFoods(){
+  if(!storageAvailable) return; // session-only mode — nothing to persist
+  try{
+    await withRetry(function(){ return window.storage.set("customFoods", JSON.stringify(state.customFoods), STORAGE_SHARED); });
+  }catch(e){
+    console.error("save custom foods failed:", e && (e.message || e));
+  }
+}
+async function loadEntry(date){
+  if(!storageAvailable) return state.entryCache && state.entryCache[date] || emptyEntry();
+  try{
+    var res = await window.storage.get("entry:"+date, STORAGE_SHARED);
+    if(res && res.value){ return JSON.parse(res.value); }
+  }catch(e){ /* no entry for this date yet */ }
+  return emptyEntry();
+}
+async function saveEntry(){
+  // always keep an in-memory copy so date-switching still works within this session
+  state.entryCache = state.entryCache || {};
+  state.entryCache[state.date] = state.entry;
+
+  if(!storageAvailable){
+    flashSaveNote("Kept for this session only (no persistent storage here)");
+    return;
+  }
+  try{
+    await withRetry(function(){ return window.storage.set("entry:"+state.date, JSON.stringify(state.entry), STORAGE_SHARED); });
+    flashSaveNote("Saved");
+  }catch(e){
+    console.error("save entry failed:", e && (e.message || e));
+    var el = document.getElementById("saveNote");
+    if(el){
+      el.innerHTML = "Save failed: " + escapeHtml(e && e.message ? e.message : "unknown error") +
+        ' <button onclick="App.retrySave()" style="background:none;border:1px solid var(--danger);color:var(--danger);padding:2px 8px;font-size:11px;cursor:pointer;margin-left:6px;">Retry</button>';
+      clearTimeout(saveNoteTimer);
+    }
+  }
+}
+async function deleteEntry(){
+  if(storageAvailable){
+    try{
+      await window.storage.delete("entry:"+state.date, STORAGE_SHARED);
+    }catch(e){ /* nothing to delete */ }
+  }
+  if(state.entryCache) delete state.entryCache[state.date];
+  state.entry = emptyEntry();
+  render();
+  flashSaveNote("Day cleared");
+}
+var saveNoteTimer = null;
+function flashSaveNote(msg){
+  var el = document.getElementById("saveNote");
+  if(!el) return;
+  el.textContent = msg;
+  clearTimeout(saveNoteTimer);
+  saveNoteTimer = setTimeout(function(){ el.textContent = ""; }, 1800);
+}
+
+async function loadHistoryIndex(){
+  state.histIndex = {};
+  if(!storageAvailable){
+    // session-only mode — build the index from whatever's cached in memory this session
+    var cache = state.entryCache || {};
+    Object.keys(cache).forEach(function(date){
+      state.histIndex[date] = totalsFor(cache[date]).cal;
+    });
+    return;
+  }
+  try{
+    var res = await window.storage.list("entry:", STORAGE_SHARED);
+    if(res && res.keys){
+      for(var i=0;i<res.keys.length;i++){
+        var k = res.keys[i]; // "entry:YYYY-MM-DD"
+        var date = k.substring(6);
+        try{
+          var got = await window.storage.get(k, STORAGE_SHARED);
+          if(got && got.value){
+            var parsed = JSON.parse(got.value);
+            state.histIndex[date] = totalsFor(parsed).cal;
+          }
+        }catch(e){}
+      }
+    }
+  }catch(e){ /* no entries yet */ }
+}
+
+// ---------------- Calc ----------------
+function totalsFor(entry){
+  var t = {carbs:0, protein:0, fat:0, cal:0};
+  SECTIONS.forEach(function(s){
+    (entry[s.key]||[]).forEach(function(it){
+      t.carbs += safeNum(it.carbs); t.protein += safeNum(it.protein); t.fat += safeNum(it.fat); t.cal += safeNum(it.cal);
+    });
+  });
+  return t;
+}
+function totalsForSection(items){
+  var t = {carbs:0, protein:0, fat:0, cal:0};
+  items.forEach(function(it){ t.carbs+=safeNum(it.carbs); t.protein+=safeNum(it.protein); t.fat+=safeNum(it.fat); t.cal+=safeNum(it.cal); });
+  return t;
+}
+function round1(n){ return Math.round(safeNum(n)*10)/10; }
+
+// ---------------- Render ----------------
+function render(){
+  if(state.view === "tracker") renderTracker();
+  else renderHistory();
+}
+
+function renderTracker(){
+  var app = document.getElementById("app");
+  var t = totalsFor(state.entry);
+
+  var html = "";
+  html += renderTopbar();
+  html += renderDateNav();
+  html += '<div class="scoreboard">' +
+      scoreTile("cal", "Calories", Math.round(t.cal), "") +
+      scoreTile("protein", "Protein", round1(t.protein), "g") +
+      scoreTile("carbs", "Carbs", round1(t.carbs), "g") +
+      scoreTile("fat", "Fat", round1(t.fat), "g") +
+    '</div>';
+
+  SECTIONS.forEach(function(s){
+    html += renderSection(s);
+  });
+
+  html += '<div class="day-actions"><button onclick="App.confirmDelete()">Clear this day</button></div>';
+  html += '<div class="save-note" id="saveNote"></div>';
+
+  app.innerHTML = html;
+  attachFoodLists();
+}
+
+function scoreTile(cls, label, val, unit){
+  return '<div class="score-tile '+cls+'"><div class="val display">'+val+(unit?('<span style="font-size:16px">'+unit+'</span>'):'')+'</div><div class="lbl">'+label+'</div></div>';
+}
+
+function renderTopbar(){
+  var banner = storageAvailable ? "" :
+    '<div class="storage-banner">This view has no persistent storage connection — entries you add will stay visible while this session is open, but won\u2019t be saved once you close it.</div>';
+  return banner + '<div class="topbar">' +
+    '<div class="brand"><span class="display">DAILY FUEL LOG</span><span class="tag">track every plate, every day</span></div>' +
+    '<div class="view-toggle">' +
+      '<button class="'+(state.view==="tracker"?"active":"")+'" onclick="App.setView(\'tracker\')">Today</button>' +
+      '<button class="'+(state.view==="history"?"active":"")+'" onclick="App.setView(\'history\')">History</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderDateNav(){
+  var isToday = state.date === todayStr();
+  return '<div class="datenav">' +
+    '<button class="arrow" onclick="App.shiftDate(-1)">&#8249;</button>' +
+    '<input type="date" value="'+state.date+'" onchange="App.setDate(this.value)">' +
+    '<button class="arrow" onclick="App.shiftDate(1)">&#8250;</button>' +
+    (isToday ? '<span class="today-label">Today</span>' : '<button class="today-btn" onclick="App.goToday()">Jump to today</button>') +
+  '</div>';
+}
+
+function renderSection(s){
+  var items = state.entry[s.key] || [];
+  var totals = totalsForSection(items);
+  var rows = "";
+  if(items.length === 0){
+    rows = '<div class="empty-row">Nothing logged yet</div>';
+  } else {
+    rows += '<div class="item-head-row"><span>Food</span><span class="q">grams</span><span>protein</span><span>carbs</span><span>fat</span><span class="sp"></span></div>';
+    items.forEach(function(it, idx){
+      rows += '<div class="item-row">' +
+        '<span class="iname">'+escapeHtml(it.name)+'</span>' +
+        '<span class="iqty">'+(it.qtyLabel || (it.qty+'g'))+'</span>' +
+        '<span class="imacro protein">'+round1(it.protein)+'</span>' +
+        '<span class="imacro carbs">'+round1(it.carbs)+'</span>' +
+        '<span class="imacro fat">'+round1(it.fat)+'</span>' +
+        '<button class="rm" onclick="App.removeItem(\''+s.key+'\','+idx+')">&times;</button>' +
+      '</div>';
+    });
+  }
+
+  var listId = "foodlist_"+s.key;
+
+  return '<div class="section'+(s.workout?' workout':'')+'">' +
+    '<div class="section-head"><span class="name display">'+s.label+'</span><span class="time">'+s.time+'</span></div>' +
+    '<div class="items">' + rows +
+      '<div class="add-row">' +
+        '<div class="food-wrap">' +
+          '<input class="food" autocomplete="off" id="food_'+s.key+'" placeholder="Search any food…" ' +
+            'onkeydown="App.foodKeydown(event,\''+s.key+'\')" ' +
+            'oninput="App.onFoodInput(\''+s.key+'\')" ' +
+            'onfocus="App.onFoodInput(\''+s.key+'\')" ' +
+            'onblur="App.onFoodBlur(\''+s.key+'\')">' +
+          '<div class="suggest-box" id="suggest_'+s.key+'"></div>' +
+        '</div>' +
+        '<input class="qty" type="number" id="qty_'+s.key+'" placeholder="grams" value="100" min="1" oninput="App.onQtyInput(\''+s.key+'\')">' +
+        '<div class="unit-toggle hidden" id="unittoggle_'+s.key+'">' +
+          '<button type="button" class="active" id="unitg_'+s.key+'" onclick="App.setUnit(\''+s.key+'\',\'g\')">g</button>' +
+          '<button type="button" id="unitpc_'+s.key+'" onclick="App.setUnit(\''+s.key+'\',\'pc\')">pc</button>' +
+          '<button type="button" id="unitml_'+s.key+'" onclick="App.setUnit(\''+s.key+'\',\'ml\')">ml</button>' +
+        '</div>' +
+        '<input class="qty conv hidden" type="number" id="conv_'+s.key+'" placeholder="g/piece" min="0.01" step="0.01" oninput="App.onQtyInput(\''+s.key+'\')">' +
+        '<button class="add-btn" onclick="App.addItem(\''+s.key+'\')">Add</button>' +
+        '<div class="weight-hint" id="hint_'+s.key+'"></div>' +
+        '<div class="search-hint">Searches your saved foods + Open Food Facts (2M+ items) as you type</div>' +
+      '</div>' +
+      '<div class="custom-panel" id="custom_'+s.key+'">' +
+        '<span class="hint">Not in our list — enter macros per 100g to save it as a custom food:</span>' +
+        '<input type="number" id="c_carbs_'+s.key+'" placeholder="carbs g">' +
+        '<input type="number" id="c_protein_'+s.key+'" placeholder="protein g">' +
+        '<input type="number" id="c_fat_'+s.key+'" placeholder="fat g">' +
+        '<input type="number" id="c_cal_'+s.key+'" placeholder="kcal">' +
+        '<button onclick="App.addCustomAndItem(\''+s.key+'\')">Save & Add</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="section-total">' +
+      '<span class="p">P <b>'+round1(totals.protein)+'g</b></span>' +
+      '<span class="c">C <b>'+round1(totals.carbs)+'g</b></span>' +
+      '<span class="f">F <b>'+round1(totals.fat)+'g</b></span>' +
+      '<span>Cal <b>'+Math.round(totals.cal)+'</b></span>' +
+    '</div>' +
+  '</div>';
+}
+
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+function attachFoodLists(){ /* suggestions are populated live via App.onFoodInput */ }
+
+// ---------------- Live food search (local cache + Open Food Facts) ----------------
+var searchTimers = {};
+var lastSuggestions = {};
+var pendingSelection = {}; // sectionKey -> {name, carbs, protein, fat, cal} once a food is resolved
+var unitMode = {};         // sectionKey -> 'g' | 'pc' | 'ml'
+var addInProgress = {};    // sectionKey -> true while an Add is being processed, blocks double-clicks
+var offApiBroken = false; // set true after first failed/blocked network call, so we stop retrying
+
+function searchLocal(query){
+  var q = query.trim().toLowerCase();
+  if(!q) return [];
+  var foods = allFoods();
+  var matches = [];
+  Object.keys(foods).forEach(function(name){
+    if(name.indexOf(q) !== -1){
+      var b = foods[name];
+      matches.push({name: capitalize(name), carbs:b[0], protein:b[1], fat:b[2], cal:b[3], source:"saved", pieceWeight: PIECE_WEIGHTS[name] || null});
+    }
+  });
+  matches.sort(function(a,b){ return a.name.length - b.name.length; });
+  return matches.slice(0, 6);
+}
+
+async function searchOnline(query){
+  if(offApiBroken) return [];
+  var url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" +
+    encodeURIComponent(query) + "&search_simple=1&action=process&json=1&page_size=8";
+  try{
+    var resp = await fetch(url);
+    if(!resp.ok) throw new Error("bad status");
+    var data = await resp.json();
+    var out = [];
+    (data.products||[]).forEach(function(p){
+      var n = p.nutriments || {};
+      var name = p.product_name || p.generic_name;
+      var cal = toNum(n["energy-kcal_100g"]);
+      if(cal === null && n["energy_100g"] !== undefined){ cal = toNum(n["energy_100g"]); if(cal!==null) cal = cal/4.184; }
+      var carbs = toNum(n["carbohydrates_100g"]), protein = toNum(n["proteins_100g"]), fat = toNum(n["fat_100g"]);
+      // OFF sometimes returns null (not undefined) for missing fields, and values as strings —
+      // toNum() normalizes both cases so incomplete entries get filtered out instead of silently
+      // becoming 0.
+      if(!name || carbs===null || protein===null || fat===null || cal===null) return;
+      out.push({
+        name: name.trim().slice(0,60), carbs: carbs, protein: protein, fat: fat, cal: cal,
+        source: p.brands ? p.brands.split(",")[0].trim() : "online"
+      });
+    });
+    return out;
+  }catch(e){
+    offApiBroken = true; // network blocked in this environment — fall back to local/custom foods only
+    return [];
+  }
+}
+function toNum(v){
+  if(v===null || v===undefined || v==="") return null;
+  var f = parseFloat(v);
+  return isFinite(f) ? f : null;
+}
+function safeNum(v){
+  var f = Number(v);
+  return isFinite(f) ? f : 0;
+}
+
+function renderSuggestList(sectionKey, list, loadingMore){
+  lastSuggestions[sectionKey] = list;
+  var box = document.getElementById("suggest_"+sectionKey);
+  if(!box) return;
+  if(list.length === 0 && !loadingMore){
+    box.classList.remove("show");
+    box.innerHTML = "";
+    return;
+  }
+  var html = list.map(function(item, idx){
+    return '<div class="suggest-item" onmousedown="App.selectFood(\''+sectionKey+'\','+idx+')">' +
+      '<span class="sname">'+escapeHtml(item.name)+'</span>' +
+      '<span class="smeta">'+Math.round(item.cal)+' kcal/100g<span class="stag">'+escapeHtml(item.source)+'</span></span>' +
+    '</div>';
+  }).join("");
+  if(loadingMore){ html += '<div class="suggest-loading">Searching online…</div>'; }
+  box.innerHTML = html;
+  box.classList.add("show");
+}
+
+// Shows the g/pc unit toggle once any food is resolved. In "pc" mode a "g/piece" field
+// appears — prefilled with a known average weight if we have one, otherwise left for the
+// user to fill in, so "pc" works for any food, not just a curated list.
+function refreshUnitUI(sectionKey){
+  var toggle = document.getElementById("unittoggle_"+sectionKey);
+  var hint = document.getElementById("hint_"+sectionKey);
+  if(!toggle || !hint) return;
+  var sel = pendingSelection[sectionKey];
+  if(sel){
+    toggle.classList.remove("hidden");
+  } else {
+    toggle.classList.add("hidden");
+    hint.style.display = "none";
+    if(unitMode[sectionKey] === "pc"){ App.setUnit(sectionKey, "g"); }
+  }
+}
+function updateQtyHint(sectionKey){
+  var hint = document.getElementById("hint_"+sectionKey);
+  var convInput = document.getElementById("conv_"+sectionKey);
+  if(!hint || !convInput) return;
+  var mode = unitMode[sectionKey] || "g";
+  if(mode === "g"){
+    hint.style.display = "none";
+    return;
+  }
+  var qty = parseFloat(document.getElementById("qty_"+sectionKey).value) || 0;
+  var conv = parseFloat(convInput.value) || 0;
+  var convHidden = convInput.classList.contains("hidden");
+  var editLink = ' <a href="#" onclick="App.toggleConv(\''+sectionKey+'\');return false;">'
+    + (convHidden ? "edit" : "hide") + "</a>";
+  if(conv > 0){
+    var unitWord = mode === "pc" ? "pc" : "ml";
+    hint.innerHTML = qty+" "+unitWord+" \u00d7 "+conv+"g/"+unitWord+" = "+Math.round(qty*conv)+"g total"+editLink;
+  } else {
+    hint.innerHTML = (mode === "pc" ? "Enter the weight of one piece (g)" : "Enter g/ml") + editLink;
+  }
+  hint.style.display = "block";
+}
+
+// ---------------- History view ----------------
+
+// ---------------- History view ----------------
+function renderHistory(){
+  var app = document.getElementById("app");
+  if(state.histYear === null){
+    var d = new Date();
+    state.histYear = d.getFullYear();
+    state.histMonth = d.getMonth();
+  }
+  var year = state.histYear, month = state.histMonth;
+  var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var first = new Date(year, month, 1);
+  var startDow = first.getDay();
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var today = todayStr();
+
+  var html = "";
+  html += renderTopbar();
+  html += '<div class="history">';
+  html += '<div class="hist-nav">' +
+    '<button onclick="App.shiftMonth(-1)">&#8249;</button>' +
+    '<span class="display">'+monthNames[month]+' '+year+'</span>' +
+    '<button onclick="App.shiftMonth(1)">&#8250;</button>' +
+  '</div>';
+  html += '<div class="cal-grid">';
+  ["S","M","T","W","T","F","S"].forEach(function(d){ html += '<div class="cal-dow">'+d+'</div>'; });
+  for(var i=0;i<startDow;i++){ html += '<div class="cal-day empty"></div>'; }
+  for(var day=1; day<=daysInMonth; day++){
+    var dateStr = year+"-"+pad(month+1)+"-"+pad(day);
+    var hasData = state.histIndex.hasOwnProperty(dateStr);
+    var cls = "cal-day" + (hasData?" has-data":"") + (dateStr===today?" today-cell":"");
+    html += '<div class="'+cls+'" onclick="App.jumpToDate(\''+dateStr+'\')">' +
+      '<span class="dnum">'+day+'</span>' +
+      (hasData ? '<span class="dcal">'+Math.round(state.histIndex[dateStr])+' cal</span>' : '') +
+    '</div>';
+  }
+  html += '</div></div>';
+  app.innerHTML = html;
+}
+
+// ---------------- Public actions ----------------
+window.App = {
+  setView: async function(v){
+    state.view = v;
+    if(v === "history"){
+      document.getElementById("app").innerHTML = '<div class="loading">Loading history…</div>';
+      await loadHistoryIndex();
+    }
+    render();
+  },
+  shiftDate: async function(delta){
+    var d = new Date(state.date+"T00:00:00");
+    d.setDate(d.getDate()+delta);
+    await App.setDate(d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()));
+  },
+  goToday: async function(){ await App.setDate(todayStr()); },
+  setDate: async function(newDate){
+    state.date = newDate;
+    document.getElementById("app").innerHTML = '<div class="loading">Loading '+newDate+'…</div>';
+    state.entry = await loadEntry(newDate);
+    render();
+  },
+  shiftMonth: function(delta){
+    state.histMonth += delta;
+    if(state.histMonth < 0){ state.histMonth = 11; state.histYear--; }
+    if(state.histMonth > 11){ state.histMonth = 0; state.histYear++; }
+    render();
+  },
+  jumpToDate: async function(dateStr){
+    state.view = "tracker";
+    await App.setDate(dateStr);
+  },
+  onFoodInput: function(sectionKey){
+    document.getElementById("custom_"+sectionKey).classList.remove("show");
+    var input = document.getElementById("food_"+sectionKey);
+    var query = input.value.trim();
+
+    // if the typed text exactly matches a known food, treat it as resolved immediately —
+    // this covers users who type a full name without clicking a suggestion
+    var qKey = query.toLowerCase();
+    var exact = allFoods()[qKey];
+    if(exact){
+      pendingSelection[sectionKey] = {name: capitalize(qKey), carbs: exact[0], protein: exact[1], fat: exact[2], cal: exact[3], pieceWeight: PIECE_WEIGHTS[qKey] || null, density: DENSITIES[qKey] || null};
+    } else if(pendingSelection[sectionKey] && pendingSelection[sectionKey].name.toLowerCase() !== qKey){
+      pendingSelection[sectionKey] = null;
+    }
+    refreshUnitUI(sectionKey);
+
+    clearTimeout(searchTimers[sectionKey]);
+    if(query.length < 2){
+      renderSuggestList(sectionKey, []);
+      return;
+    }
+    var local = searchLocal(query);
+    renderSuggestList(sectionKey, local, query.length >= 3 && !offApiBroken);
+    if(query.length < 3 || offApiBroken) return;
+    searchTimers[sectionKey] = setTimeout(async function(){
+      var online = await searchOnline(query);
+      // merge: local first, then online results not already present by name
+      var seen = {}; local.forEach(function(i){ seen[i.name.toLowerCase()] = true; });
+      var merged = local.concat(online.filter(function(i){ return !seen[i.name.toLowerCase()]; }));
+      renderSuggestList(sectionKey, merged.slice(0, 10));
+    }, 350);
+  },
+  onQtyInput: function(sectionKey){
+    updateQtyHint(sectionKey);
+  },
+  setUnit: function(sectionKey, mode){
+    unitMode[sectionKey] = mode;
+    var gBtn = document.getElementById("unitg_"+sectionKey);
+    var pcBtn = document.getElementById("unitpc_"+sectionKey);
+    var mlBtn = document.getElementById("unitml_"+sectionKey);
+    var convInput = document.getElementById("conv_"+sectionKey);
+    if(gBtn) gBtn.classList.toggle("active", mode === "g");
+    if(pcBtn) pcBtn.classList.toggle("active", mode === "pc");
+    if(mlBtn) mlBtn.classList.toggle("active", mode === "ml");
+    var qtyInput = document.getElementById("qty_"+sectionKey);
+    if(qtyInput){
+      qtyInput.placeholder = mode === "g" ? "grams" : (mode === "pc" ? "count" : "ml");
+      qtyInput.value = mode === "g" ? 100 : (mode === "pc" ? 1 : 100);
+    }
+    if(convInput){
+      if(mode === "pc"){
+        convInput.placeholder = "g/piece";
+        var sel = pendingSelection[sectionKey];
+        var knownPc = sel && sel.pieceWeight;
+        convInput.value = knownPc ? knownPc : "";
+        // if we know a standard weight, hide the field (auto-used); otherwise there's no
+        // safe default, so show it and require the user to fill it in
+        if(knownPc){ convInput.classList.add("hidden"); } else { convInput.classList.remove("hidden"); }
+      } else if(mode === "ml"){
+        convInput.placeholder = "g/ml";
+        var sel2 = pendingSelection[sectionKey];
+        convInput.value = (sel2 && sel2.density) ? sel2.density : 1;
+        // 1 g/ml is a safe default for most liquids, so keep this hidden unless the user
+        // taps "edit" to fine-tune it
+        convInput.classList.add("hidden");
+      } else {
+        convInput.classList.add("hidden");
+      }
+    }
+    updateQtyHint(sectionKey);
+  },
+  toggleConv: function(sectionKey){
+    var convInput = document.getElementById("conv_"+sectionKey);
+    if(!convInput) return;
+    convInput.classList.toggle("hidden");
+    if(!convInput.classList.contains("hidden")) convInput.focus();
+    updateQtyHint(sectionKey);
+  },
+  onFoodBlur: function(sectionKey){
+    // delay so a click on a suggestion (onmousedown) registers before we hide the box
+    setTimeout(function(){
+      var box = document.getElementById("suggest_"+sectionKey);
+      if(box) box.classList.remove("show");
+    }, 150);
+  },
+  selectFood: async function(sectionKey, idx){
+    var item = (lastSuggestions[sectionKey]||[])[idx];
+    if(!item) return;
+    var key = item.name.toLowerCase();
+    var c = safeNum(item.carbs), p = safeNum(item.protein), f = safeNum(item.fat), cal = safeNum(item.cal);
+    if(!allFoods().hasOwnProperty(key)){
+      state.customFoods[key] = [c, p, f, cal];
+      await saveCustomFoods();
+    }
+    pendingSelection[sectionKey] = {
+      name: item.name, carbs: c, protein: p, fat: f, cal: cal,
+      pieceWeight: item.pieceWeight || PIECE_WEIGHTS[key] || null,
+      density: DENSITIES[key] || null
+    };
+    var input = document.getElementById("food_"+sectionKey);
+    input.value = item.name;
+    document.getElementById("suggest_"+sectionKey).classList.remove("show");
+    document.getElementById("custom_"+sectionKey).classList.remove("show");
+    refreshUnitUI(sectionKey);
+    document.getElementById("qty_"+sectionKey).focus();
+  },
+  foodKeydown: function(evt, sectionKey){
+    if(evt.key === "Enter"){
+      evt.preventDefault();
+      document.getElementById("suggest_"+sectionKey).classList.remove("show");
+      App.addItem(sectionKey);
+    }
+  },
+  addItem: async function(sectionKey){
+    if(addInProgress[sectionKey]) return; // guards against a double-click pushing two entries
+    addInProgress[sectionKey] = true;
+    try{
+      var foodInput = document.getElementById("food_"+sectionKey);
+      var qtyInput = document.getElementById("qty_"+sectionKey);
+      var name = foodInput.value.trim();
+      var mode = unitMode[sectionKey] || "g";
+      var rawQty = parseFloat(qtyInput.value) || (mode === "pc" ? 1 : 100);
+      if(!name) return;
+
+      var resolved = pendingSelection[sectionKey];
+      if(!resolved || resolved.name.toLowerCase() !== name.toLowerCase()){
+        // fall back to an exact match against the food list
+        var key = name.toLowerCase();
+        var foods = allFoods();
+        if(!foods.hasOwnProperty(key)){
+          document.getElementById("custom_"+sectionKey).classList.add("show");
+          return;
+        }
+        var base = foods[key];
+        resolved = {name: name, carbs: safeNum(base[0]), protein: safeNum(base[1]), fat: safeNum(base[2]), cal: safeNum(base[3])};
+      }
+
+      var gramWeight = rawQty;
+      var qtyLabel = Math.round(rawQty) + "g";
+      if(mode === "pc" || mode === "ml"){
+        var convInput = document.getElementById("conv_"+sectionKey);
+        var conv = parseFloat(convInput && convInput.value) || 0;
+        if(conv <= 0){
+          convInput.focus();
+          flashSaveNote(mode === "pc" ? "Enter the weight of one piece first" : "Enter g/ml first (1 is a safe default for most liquids)");
+          return;
+        }
+        gramWeight = rawQty * conv;
+        qtyLabel = mode === "pc"
+          ? (rawQty + " pc \u2192 " + Math.round(gramWeight) + "g used")
+          : (rawQty + " ml \u2192 " + Math.round(gramWeight) + "g used");
+      }
+
+      var mult = gramWeight/100;
+      state.entry[sectionKey].push({
+        name: capitalize(resolved.name), qty: Math.round(gramWeight), qtyLabel: qtyLabel,
+        carbs: resolved.carbs*mult, protein: resolved.protein*mult, fat: resolved.fat*mult, cal: resolved.cal*mult
+      });
+      pendingSelection[sectionKey] = null;
+      unitMode[sectionKey] = "g";
+      await saveEntry();
+      render();
+    } finally {
+      addInProgress[sectionKey] = false;
+    }
+  },
+  addCustomAndItem: async function(sectionKey){
+    var foodInput = document.getElementById("food_"+sectionKey);
+    var qtyInput = document.getElementById("qty_"+sectionKey);
+    var name = foodInput.value.trim();
+    if(!name) return;
+    var carbs = safeNum(document.getElementById("c_carbs_"+sectionKey).value);
+    var protein = safeNum(document.getElementById("c_protein_"+sectionKey).value);
+    var fat = safeNum(document.getElementById("c_fat_"+sectionKey).value);
+    var cal = safeNum(document.getElementById("c_cal_"+sectionKey).value);
+    var key = name.toLowerCase();
+    state.customFoods[key] = [carbs, protein, fat, cal];
+    await saveCustomFoods();
+    pendingSelection[sectionKey] = {name: name, carbs: carbs, protein: protein, fat: fat, cal: cal};
+    var qty = parseFloat(qtyInput.value) || 100;
+    var mult = qty/100;
+    state.entry[sectionKey].push({
+      name: capitalize(name), qty: qty,
+      carbs: carbs*mult, protein: protein*mult, fat: fat*mult, cal: cal*mult
+    });
+    pendingSelection[sectionKey] = null;
+    unitMode[sectionKey] = "g";
+    await saveEntry();
+    render();
+  },
+  removeItem: async function(sectionKey, idx){
+    state.entry[sectionKey].splice(idx,1);
+    await saveEntry();
+    render();
+  },
+  confirmDelete: function(){
+    if(confirm("Clear all entries logged for "+state.date+"? This can't be undone.")){
+      deleteEntry();
+    }
+  },
+  retrySave: function(){ saveEntry(); }
+};
+
+// ---------------- Init ----------------
+async function init(){
+  try{
+    await loadCustomFoods();
+    state.entry = await loadEntry(state.date);
+  }catch(e){
+    console.error("init error", e);
+  }
+  render();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
