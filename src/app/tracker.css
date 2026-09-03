@@ -35,20 +35,29 @@
 
 /* ---- Top bar ---- */
 .tracker-root .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
   gap: 10px;
   flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 2px solid var(--protein);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.55);
+  margin-bottom: 18px;
+  padding: 14px 16px;
 }
 .tracker-root .brand {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .tracker-root .brand .display {
-  font-size: 34px;
+  font-size: 30px;
   line-height: 1;
   color: var(--text);
 }
@@ -60,7 +69,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: var(--surface);
+  background: var(--surface-alt);
   border: 1px solid var(--line);
   padding: 3px 8px;
   font-size: 12px;
@@ -68,25 +77,71 @@
   color: var(--fat);
 }
 
+.tracker-root .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .tracker-root .view-toggle {
   display: flex;
-  background: var(--surface);
+  background: var(--surface-alt);
   border: 1px solid var(--line);
 }
 .tracker-root .view-toggle a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: none;
+  border-right: 1px solid var(--line);
   color: var(--text-muted);
   font-weight: 600;
   font-size: 13px;
-  padding: 9px 16px;
+  padding: 9px 14px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.tracker-root .view-toggle a:last-child {
+  border-right: none;
+}
+.tracker-root .view-toggle a:hover {
+  background: var(--surface);
+  color: var(--text);
 }
 .tracker-root .view-toggle a.active {
   background: var(--protein);
   color: #241c05;
+}
+.tracker-root .view-toggle a.active:hover {
+  background: var(--protein);
+  color: #241c05;
+}
+
+.tracker-root .account-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tracker-root .account-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.tracker-root .signout-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.tracker-root .signout-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 /* ---- Date nav ---- */
@@ -256,9 +311,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 10px 14px;
+  border: none;
   border-bottom: 1px solid var(--line);
   background: var(--surface-alt);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.tracker-root .shead-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.tracker-root .shead-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .tracker-root .section-head .name {
   font-family: var(--font-bebas-neue), sans-serif;
@@ -268,6 +338,21 @@
 .tracker-root .section-head .time {
   font-size: 11px;
   color: var(--text-muted);
+}
+.tracker-root .mini-total {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .chevron {
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.tracker-root .chevron.open {
+  transform: rotate(180deg);
 }
 .tracker-root .section.workout .section-head {
   border-left: 3px solid var(--workout);
