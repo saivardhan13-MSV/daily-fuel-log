@@ -786,31 +786,86 @@
   background: var(--surface);
   border: 1px solid var(--line);
   padding: 14px 16px;
-  width: 160px;
+  width: 200px;
   margin-bottom: 14px;
 }
 .tracker-root .water-title {
   font-size: 18px;
   letter-spacing: 1px;
   color: var(--carbs);
-  margin-bottom: 2px;
+  margin-bottom: 8px;
+}
+.tracker-root .water-gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.tracker-root .water-gauge {
+  width: 58px;
+  height: auto;
+  flex-shrink: 0;
+}
+.tracker-root .water-gauge-outline {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.tracker-root .water-gauge-tick {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+.tracker-root .water-gauge-fill {
+  fill: var(--carbs);
+  opacity: 0.32;
+  transition: y 0.5s ease, height 0.5s ease;
+}
+.tracker-root .water-gauge-wave-group {
+  transition: transform 0.5s ease;
+}
+.tracker-root .water-gauge-wave {
+  fill: var(--carbs);
+}
+.tracker-root .water-gauge-wave-a {
+  opacity: 0.55;
+  animation: water-wave-scroll 3.2s linear infinite;
+}
+.tracker-root .water-gauge-wave-b {
+  opacity: 0.4;
+  animation: water-wave-scroll 4.6s linear infinite reverse;
+}
+@keyframes water-wave-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-40px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tracker-root .water-gauge-wave-a,
+  .tracker-root .water-gauge-wave-b {
+    animation: none;
+  }
+}
+.tracker-root .water-readout {
+  flex: 1;
 }
 .tracker-root .water-amount {
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
   color: var(--text);
 }
 .tracker-root .water-goal {
   font-size: 10.5px;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-top: 2px;
 }
-.tracker-root .water-bar-track {
-  margin-bottom: 10px;
-  height: 4px;
-}
-.tracker-root .water-bar-fill {
-  background: var(--carbs);
+.tracker-root .water-goal-hit {
+  font-size: 10.5px;
+  color: var(--workout);
+  font-weight: 700;
+  margin-top: 3px;
 }
 .tracker-root .water-buttons {
   display: flex;
@@ -852,14 +907,24 @@
 }
 
 /* Floats beside the centered .app column only when there's room for it
-   without overlapping the tracker content; otherwise it sits inline. */
-@media (min-width: 1300px) {
+   without overlapping the tracker content; otherwise it sits inline.
+   Compact sizing here (vs. the roomier inline version) so it still fits
+   the margin on more common laptop widths, not just very wide monitors. */
+@media (min-width: 1220px) {
   .tracker-root .water-widget {
     position: fixed;
     top: 110px;
-    right: max(24px, calc((100vw - 880px) / 2 - 184px));
+    right: max(16px, calc((100vw - 880px) / 2 - 176px));
+    width: 160px;
+    padding: 12px 14px;
     margin-bottom: 0;
     z-index: 5;
+  }
+  .tracker-root .water-widget .water-gauge {
+    width: 44px;
+  }
+  .tracker-root .water-widget .water-amount {
+    font-size: 21px;
   }
 }
 
