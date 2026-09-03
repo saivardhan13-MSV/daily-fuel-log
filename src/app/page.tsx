@@ -10,6 +10,7 @@ import ClearDayButton from "@/components/tracker/ClearDayButton";
 import ScoreTile from "@/components/tracker/ScoreTile";
 import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
+import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
 export default async function Home(props: PageProps<"/">) {
@@ -81,6 +82,7 @@ export default async function Home(props: PageProps<"/">) {
         ))}
 
         <ClearDayButton date={date} />
+        <FooterDisclaimer />
       </div>
     </div>
   );

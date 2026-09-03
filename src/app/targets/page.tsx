@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getBodyTargets } from "@/lib/db";
 import Topbar from "@/components/tracker/Topbar";
 import TargetsForm from "@/components/tracker/TargetsForm";
+import { TargetsDisclaimer, FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "../tracker.css";
 
 export default async function TargetsPage() {
@@ -18,6 +19,7 @@ export default async function TargetsPage() {
     <div className="tracker-root">
       <div className="app">
         <Topbar active="targets" userEmail={user.email} />
+        <TargetsDisclaimer />
 
         {targets?.target_calories != null && (
           <div className="scoreboard">
@@ -50,6 +52,7 @@ export default async function TargetsPage() {
         )}
 
         <TargetsForm existing={targets} />
+        <FooterDisclaimer />
       </div>
     </div>
   );

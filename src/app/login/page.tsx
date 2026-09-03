@@ -67,6 +67,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
             </button>
           </div>
         </form>
+
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+          For personal tracking only — not medical or dietary advice. Consult a
+          doctor or registered dietitian before making significant diet changes.
+        </p>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMonthTotals } from "@/lib/db";
 import { todayStr } from "@/lib/nutrition";
 import Topbar from "@/components/tracker/Topbar";
+import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "../tracker.css";
 
 const MONTH_NAMES = [
@@ -81,6 +82,7 @@ export default async function HistoryPage(props: PageProps<"/history">) {
             {cells}
           </div>
         </div>
+        <FooterDisclaimer />
       </div>
     </div>
   );
