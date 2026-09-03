@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMonthTotals } from "@/lib/db";
+import { getMonthTotals, getStreak } from "@/lib/db";
 import { todayStr } from "@/lib/nutrition";
 import Topbar from "@/components/tracker/Topbar";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
@@ -29,7 +29,10 @@ export default async function HistoryPage(props: PageProps<"/history">) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const totals = await getMonthTotals(supabase, user.id, year, month);
+  const [totals, streak] = await Promise.all([
+    getMonthTotals(supabase, user.id, year, month),
+    getStreak(supabase, user.id),
+  ]);
   const today = todayStr();
 
   const first = new Date(year, month, 1);
@@ -60,7 +63,7 @@ export default async function HistoryPage(props: PageProps<"/history">) {
   return (
     <div className="tracker-root">
       <div className="app">
-        <Topbar active="history" userEmail={user.email} />
+        <Topbar active="history" userEmail={user.email} streak={streak} />
         <div className="history">
           <div className="hist-nav">
             <Link href={`/history?year=${prevYear}&month=${prevMonth}`} className="nav-btn">

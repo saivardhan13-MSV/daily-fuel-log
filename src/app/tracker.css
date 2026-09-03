@@ -56,6 +56,17 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+.tracker-root .streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fat);
+}
 
 .tracker-root .view-toggle {
   display: flex;
@@ -152,26 +163,66 @@
   color: var(--text-muted);
   margin-top: 2px;
 }
-.tracker-root .score-tile .bar-track {
-  height: 3px;
-  background: var(--line);
-  margin-top: 6px;
-  overflow: hidden;
+.tracker-root .score-tile.ring-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px 14px;
 }
-.tracker-root .score-tile .bar-fill {
+.tracker-root .ring-wrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 6px;
+}
+.tracker-root .ring-svg {
+  width: 100%;
   height: 100%;
+  transform: rotate(-90deg);
 }
-.tracker-root .score-tile.cal .bar-fill {
-  background: var(--cal);
+.tracker-root .ring-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 9;
 }
-.tracker-root .score-tile.protein .bar-fill {
-  background: var(--protein);
+.tracker-root .ring-fill {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
 }
-.tracker-root .score-tile.carbs .bar-fill {
-  background: var(--carbs);
+.tracker-root .score-tile.cal .ring-fill {
+  stroke: var(--cal);
 }
-.tracker-root .score-tile.fat .bar-fill {
-  background: var(--fat);
+.tracker-root .score-tile.protein .ring-fill {
+  stroke: var(--protein);
+}
+.tracker-root .score-tile.carbs .ring-fill {
+  stroke: var(--carbs);
+}
+.tracker-root .score-tile.fat .ring-fill {
+  stroke: var(--fat);
+}
+.tracker-root .ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.tracker-root .ring-center .val {
+  font-size: 24px;
+}
+.tracker-root .ring-unit {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: -2px;
+}
+.tracker-root .ring-tile .lbl {
+  margin-top: 0;
 }
 .tracker-root .score-tile.cal .val {
   color: var(--cal);
@@ -632,6 +683,17 @@
 }
 .tracker-root .disclaimer-box strong {
   color: var(--text);
+}
+
+.tracker-root .milestone-banner {
+  background: var(--surface);
+  border: 1px solid var(--workout);
+  color: var(--workout);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  text-align: center;
 }
 
 /* ---- Water intake widget ---- */

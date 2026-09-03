@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getBodyTargets } from "@/lib/db";
+import { getBodyTargets, getStreak } from "@/lib/db";
 import Topbar from "@/components/tracker/Topbar";
 import TargetsForm from "@/components/tracker/TargetsForm";
 import { TargetsDisclaimer, FooterDisclaimer } from "@/components/tracker/Disclaimer";
@@ -13,12 +13,15 @@ export default async function TargetsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const targets = await getBodyTargets(supabase, user.id);
+  const [targets, streak] = await Promise.all([
+    getBodyTargets(supabase, user.id),
+    getStreak(supabase, user.id),
+  ]);
 
   return (
     <div className="tracker-root">
       <div className="app">
-        <Topbar active="targets" userEmail={user.email} />
+        <Topbar active="targets" userEmail={user.email} streak={streak} />
         <TargetsDisclaimer />
 
         {targets?.target_calories != null && (

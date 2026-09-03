@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEntriesForDate, getCustomFoods, getBodyTargets, getWaterIntake } from "@/lib/db";
+import {
+  getEntriesForDate,
+  getCustomFoods,
+  getBodyTargets,
+  getWaterIntake,
+  getStreak,
+} from "@/lib/db";
 import { totalsForEntries, round1, todayStr } from "@/lib/nutrition";
 import { SECTIONS } from "@/lib/food-db";
 import Topbar from "@/components/tracker/Topbar";
@@ -24,22 +30,29 @@ export default async function Home(props: PageProps<"/">) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [entries, customFoods, targets, waterMl] = await Promise.all([
+  const [entries, customFoods, targets, waterMl, streak] = await Promise.all([
     getEntriesForDate(supabase, user.id, date),
     getCustomFoods(supabase, user.id),
     getBodyTargets(supabase, user.id),
     getWaterIntake(supabase, user.id, date),
+    getStreak(supabase, user.id),
   ]);
 
   const totals = totalsForEntries(entries);
+  const proteinGoalMet =
+    targets?.target_protein != null && totals.protein >= targets.target_protein;
 
   return (
     <div className="tracker-root">
       <div className="app">
         <DateSync currentDate={date} hasExplicitDate={hasExplicitDate} />
-        <Topbar active="tracker" userEmail={user.email} />
+        <Topbar active="tracker" userEmail={user.email} streak={streak} />
         <DateNav date={date} />
         <WaterWidget date={date} amountMl={waterMl} />
+
+        {proteinGoalMet && (
+          <div className="milestone-banner">🎉 Protein goal reached for today!</div>
+        )}
 
         <div className="scoreboard">
           <ScoreTile

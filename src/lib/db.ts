@@ -99,6 +99,94 @@ export async function getCustomFoods(
   return data ?? [];
 }
 
+function pad(n: number): string {
+  return n < 10 ? "0" + n : "" + n;
+}
+function formatDate(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Consecutive days (ending today or yesterday) with at least one logged
+// entry. A day with nothing logged yet doesn't break an in-progress streak
+// until it actually passes.
+export async function getStreak(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { data, error } = await supabase
+    .from("daily_entries")
+    .select("entry_date")
+    .eq("user_id", userId)
+    .order("entry_date", { ascending: false })
+    .limit(2000);
+
+  if (error) throw error;
+
+  const dateSet = new Set((data ?? []).map((r) => r.entry_date as string));
+  if (dateSet.size === 0) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const cursor = new Date(today);
+  if (!dateSet.has(formatDate(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  let streak = 0;
+  while (dateSet.has(formatDate(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+export interface DayTotals {
+  date: string;
+  cal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+// Per-day totals for the last `days` days (including today), oldest first,
+// with every day present even if nothing was logged (filled with zeros).
+export async function getRecentDailyTotals(
+  supabase: SupabaseClient,
+  userId: string,
+  days: number,
+): Promise<DayTotals[]> {
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setDate(start.getDate() - (days - 1));
+
+  const { data, error } = await supabase
+    .from("daily_entries")
+    .select("entry_date, calories, protein, carbs, fat")
+    .eq("user_id", userId)
+    .gte("entry_date", formatDate(start))
+    .lte("entry_date", formatDate(end));
+
+  if (error) throw error;
+
+  const byDate = new Map<string, DayTotals>();
+  for (const row of data ?? []) {
+    const key = row.entry_date as string;
+    const existing = byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0 };
+    existing.cal += Number(row.calories ?? 0);
+    existing.protein += Number(row.protein ?? 0);
+    existing.carbs += Number(row.carbs ?? 0);
+    existing.fat += Number(row.fat ?? 0);
+    byDate.set(key, existing);
+  }
+
+  const out: DayTotals[] = [];
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    const key = formatDate(cursor);
+    out.push(byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0 });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return out;
+}
+
 // date (YYYY-MM-DD) -> total calories for that day, for the given month
 export async function getMonthTotals(
   supabase: SupabaseClient,
@@ -106,7 +194,6 @@ export async function getMonthTotals(
   year: number,
   month: number, // 0-11
 ): Promise<Record<string, number>> {
-  const pad = (n: number) => (n < 10 ? "0" + n : "" + n);
   const start = `${year}-${pad(month + 1)}-01`;
   const endDate = new Date(year, month + 1, 0).getDate();
   const end = `${year}-${pad(month + 1)}-${pad(endDate)}`;
