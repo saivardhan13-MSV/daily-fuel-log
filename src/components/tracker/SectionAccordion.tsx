@@ -31,7 +31,9 @@ export default function SectionAccordion({
           </span>
         </span>
       </button>
-      {open && children}
+      <div className={`accordion-body${open ? " open" : ""}`}>
+        <div className="accordion-inner">{children}</div>
+      </div>
     </>
   );
 }

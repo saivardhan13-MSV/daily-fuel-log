@@ -10,16 +10,21 @@ export default function MealSection({
   items,
   date,
   customFoods,
+  animationIndex = 0,
 }: {
   section: SectionConfig;
   items: EntryItem[];
   date: string;
   customFoods: CustomFoodRow[];
+  animationIndex?: number;
 }) {
   const totals = totalsForItems(items);
 
   return (
-    <div className={`section${section.workout ? " workout" : ""}`}>
+    <div
+      className={`section section-enter${section.workout ? " workout" : ""}`}
+      style={{ animationDelay: `${animationIndex * 45}ms` }}
+    >
       <SectionAccordion
         defaultOpen={items.length > 0}
         headerLeft={

@@ -44,58 +44,67 @@ export default async function Home(props: PageProps<"/">) {
 
   return (
     <div className="tracker-root">
-      <div className="app">
+      <div className="page-shell">
         <DateSync currentDate={date} hasExplicitDate={hasExplicitDate} />
         <Topbar active="tracker" userEmail={user.email} streak={streak} />
-        <DateNav date={date} />
-        <WaterWidget date={date} amountMl={waterMl} />
 
-        {proteinGoalMet && (
-          <div className="milestone-banner">🎉 Protein goal reached for today!</div>
-        )}
+        <div className="page-body">
+          <div className="app">
+            <DateNav date={date} />
 
-        <div className="scoreboard">
-          <ScoreTile
-            cls="cal"
-            label="Calories"
-            value={Math.round(totals.cal)}
-            target={targets?.target_calories}
-          />
-          <ScoreTile
-            cls="protein"
-            label="Protein"
-            value={round1(totals.protein)}
-            unit="g"
-            target={targets?.target_protein}
-          />
-          <ScoreTile
-            cls="carbs"
-            label="Carbs"
-            value={round1(totals.carbs)}
-            unit="g"
-            target={targets?.target_carbs}
-          />
-          <ScoreTile
-            cls="fat"
-            label="Fat"
-            value={round1(totals.fat)}
-            unit="g"
-            target={targets?.target_fat}
-          />
+            {proteinGoalMet && (
+              <div className="milestone-banner">🎉 Protein goal reached for today!</div>
+            )}
+
+            <div className="scoreboard">
+              <ScoreTile
+                cls="cal"
+                label="Calories"
+                value={Math.round(totals.cal)}
+                target={targets?.target_calories}
+              />
+              <ScoreTile
+                cls="protein"
+                label="Protein"
+                value={round1(totals.protein)}
+                unit="g"
+                target={targets?.target_protein}
+              />
+              <ScoreTile
+                cls="carbs"
+                label="Carbs"
+                value={round1(totals.carbs)}
+                unit="g"
+                target={targets?.target_carbs}
+              />
+              <ScoreTile
+                cls="fat"
+                label="Fat"
+                value={round1(totals.fat)}
+                unit="g"
+                target={targets?.target_fat}
+              />
+            </div>
+
+            {SECTIONS.map((section, i) => (
+              <MealSection
+                key={section.key}
+                section={section}
+                items={entries[section.key]}
+                date={date}
+                customFoods={customFoods}
+                animationIndex={i}
+              />
+            ))}
+
+            <ClearDayButton date={date} />
+            <FooterDisclaimer />
+          </div>
+
+          <aside className="sidebar">
+            <WaterWidget date={date} amountMl={waterMl} />
+          </aside>
         </div>
-
-        {SECTIONS.map((section) => (
-          <MealSection
-            key={section.key}
-            section={section}
-            items={entries[section.key]}
-            date={date}
-            customFoods={customFoods}
-          />
-        ))}
-
-        <ClearDayButton date={date} />
-        <FooterDisclaimer />
       </div>
     </div>
   );
