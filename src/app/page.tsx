@@ -9,11 +9,13 @@ import MealSection from "@/components/tracker/MealSection";
 import ClearDayButton from "@/components/tracker/ClearDayButton";
 import ScoreTile from "@/components/tracker/ScoreTile";
 import WaterWidget from "@/components/tracker/WaterWidget";
+import DateSync from "@/components/tracker/DateSync";
 import "./tracker.css";
 
 export default async function Home(props: PageProps<"/">) {
   const searchParams = await props.searchParams;
-  const date = typeof searchParams.date === "string" ? searchParams.date : todayStr();
+  const hasExplicitDate = typeof searchParams.date === "string";
+  const date = hasExplicitDate ? (searchParams.date as string) : todayStr();
 
   const supabase = await createClient();
   const {
@@ -33,6 +35,7 @@ export default async function Home(props: PageProps<"/">) {
   return (
     <div className="tracker-root">
       <div className="app">
+        <DateSync currentDate={date} hasExplicitDate={hasExplicitDate} />
         <Topbar active="tracker" userEmail={user.email} />
         <DateNav date={date} />
         <WaterWidget date={date} amountMl={waterMl} />
