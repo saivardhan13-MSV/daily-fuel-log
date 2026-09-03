@@ -11,17 +11,23 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next") ?? "/";
 
   const supabase = await createClient();
+  let verified = false;
 
-  // Supabase's default hosted /verify endpoint redirects here with a PKCE
-  // `code` param. A custom email template pointing straight at this route
-  // would instead send `token_hash` + `type`. Handle both.
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) redirect(next);
-  } else if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash });
-    if (!error) redirect(next);
+  try {
+    // Supabase's default hosted /verify endpoint redirects here with a PKCE
+    // `code` param. A custom email template pointing straight at this route
+    // would instead send `token_hash` + `type`. Handle both.
+    if (code) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      verified = !error;
+    } else if (token_hash && type) {
+      const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+      verified = !error;
+    }
+  } catch {
+    verified = false;
   }
 
+  if (verified) redirect(next);
   redirect(`/login?error=${encodeURIComponent("Could not verify that email link — it may have expired.")}`);
 }

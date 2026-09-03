@@ -42,6 +42,22 @@ export async function getBodyTargets(
   return data;
 }
 
+export async function getWaterIntake(
+  supabase: SupabaseClient,
+  userId: string,
+  date: string,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("water_intake")
+    .select("amount_ml")
+    .eq("user_id", userId)
+    .eq("entry_date", date)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? Number(data.amount_ml) : 0;
+}
+
 export function emptyEntries(): EntriesBySection {
   const e = {} as EntriesBySection;
   for (const s of SECTIONS) e[s.key] = [];

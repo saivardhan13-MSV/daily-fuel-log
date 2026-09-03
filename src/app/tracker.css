@@ -609,6 +609,88 @@
   outline-offset: -2px;
 }
 
+/* ---- Water intake widget ---- */
+.tracker-root .water-widget {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+  width: 160px;
+  margin-bottom: 14px;
+}
+.tracker-root .water-title {
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--carbs);
+  margin-bottom: 2px;
+}
+.tracker-root .water-amount {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--text);
+}
+.tracker-root .water-goal {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.tracker-root .water-bar-track {
+  margin-bottom: 10px;
+  height: 4px;
+}
+.tracker-root .water-bar-fill {
+  background: var(--carbs);
+}
+.tracker-root .water-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.tracker-root .water-buttons button {
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 7px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tracker-root .water-buttons button:hover {
+  border-color: var(--carbs);
+  color: var(--carbs);
+}
+.tracker-root .water-buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tracker-root .water-reset {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  padding: 6px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tracker-root .water-reset:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Floats beside the centered .app column only when there's room for it
+   without overlapping the tracker content; otherwise it sits inline. */
+@media (min-width: 1300px) {
+  .tracker-root .water-widget {
+    position: fixed;
+    top: 110px;
+    right: max(24px, calc((100vw - 880px) / 2 - 184px));
+    margin-bottom: 0;
+    z-index: 5;
+  }
+}
+
 @media (max-width: 520px) {
   .tracker-root .scoreboard {
     grid-template-columns: 1fr 1fr;

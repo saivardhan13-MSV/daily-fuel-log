@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEntriesForDate, getCustomFoods, getBodyTargets } from "@/lib/db";
+import { getEntriesForDate, getCustomFoods, getBodyTargets, getWaterIntake } from "@/lib/db";
 import { totalsForEntries, round1, todayStr } from "@/lib/nutrition";
 import { SECTIONS } from "@/lib/food-db";
 import Topbar from "@/components/tracker/Topbar";
@@ -8,6 +8,7 @@ import DateNav from "@/components/tracker/DateNav";
 import MealSection from "@/components/tracker/MealSection";
 import ClearDayButton from "@/components/tracker/ClearDayButton";
 import ScoreTile from "@/components/tracker/ScoreTile";
+import WaterWidget from "@/components/tracker/WaterWidget";
 import "./tracker.css";
 
 export default async function Home(props: PageProps<"/">) {
@@ -20,10 +21,11 @@ export default async function Home(props: PageProps<"/">) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [entries, customFoods, targets] = await Promise.all([
+  const [entries, customFoods, targets, waterMl] = await Promise.all([
     getEntriesForDate(supabase, user.id, date),
     getCustomFoods(supabase, user.id),
     getBodyTargets(supabase, user.id),
+    getWaterIntake(supabase, user.id, date),
   ]);
 
   const totals = totalsForEntries(entries);
@@ -33,6 +35,7 @@ export default async function Home(props: PageProps<"/">) {
       <div className="app">
         <Topbar active="tracker" userEmail={user.email} />
         <DateNav date={date} />
+        <WaterWidget date={date} amountMl={waterMl} />
 
         <div className="scoreboard">
           <ScoreTile
