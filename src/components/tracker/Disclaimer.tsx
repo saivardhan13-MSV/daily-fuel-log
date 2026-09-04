@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function FooterDisclaimer() {
   return (
     <p className="disclaimer-footer">
@@ -5,6 +7,10 @@ export function FooterDisclaimer() {
       it isn&apos;t medical, dietary, or fitness advice. Talk to a doctor or
       registered dietitian before changing your diet, especially if you have any
       health condition.
+      <br />
+      <Link href="/about" className="disclaimer-about-link">
+        About this app &amp; how the numbers work
+      </Link>
     </p>
   );
 }

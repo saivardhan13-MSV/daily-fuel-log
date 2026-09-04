@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { login, signup } from "./actions";
 
 export default async function LoginPage(props: PageProps<"/login">) {
@@ -71,6 +72,10 @@ export default async function LoginPage(props: PageProps<"/login">) {
         <p className="mt-6 text-center text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
           For personal tracking only — not medical or dietary advice. Consult a
           doctor or registered dietitian before making significant diet changes.
+          <br />
+          <Link href="/about" className="underline hover:text-zinc-700 dark:hover:text-zinc-300">
+            About this app
+          </Link>
         </p>
       </div>
     </div>

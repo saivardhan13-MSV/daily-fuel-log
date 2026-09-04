@@ -930,6 +930,12 @@
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
+.tracker-root .disclaimer-about-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--protein);
+  text-decoration: underline;
+}
 .tracker-root .disclaimer-box {
   background: var(--surface);
   border: 1px solid var(--line);
