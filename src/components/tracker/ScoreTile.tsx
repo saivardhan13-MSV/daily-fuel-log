@@ -4,18 +4,23 @@ export default function ScoreTile({
   value,
   unit,
   target,
+  size = "compact",
+  subtitle,
 }: {
   cls: string;
   label: string;
   value: number;
   unit?: string;
   target?: number | null;
+  size?: "compact" | "hero";
+  subtitle?: string;
 }) {
   const hasTarget = target != null && target > 0;
+  const sizeClass = size === "hero" ? " ring-tile-hero" : "";
 
   if (!hasTarget) {
     return (
-      <div className={`score-tile ${cls}`}>
+      <div className={`score-tile ${cls}${sizeClass}`}>
         <div className="val display">
           {value}
           {unit && <span style={{ fontSize: 16 }}>{unit}</span>}
@@ -31,7 +36,7 @@ export default function ScoreTile({
   const offset = circumference * (1 - pct / 100);
 
   return (
-    <div className={`score-tile ring-tile ${cls}`}>
+    <div className={`score-tile ring-tile${sizeClass} ${cls}`}>
       <div className="ring-wrap">
         <svg viewBox="0 0 100 100" className="ring-svg">
           <circle cx="50" cy="50" r={radius} className="ring-track" />
@@ -56,6 +61,7 @@ export default function ScoreTile({
         of {target}
         {unit}
       </div>
+      {subtitle && <div className="hero-subtitle">{subtitle}</div>}
     </div>
   );
 }

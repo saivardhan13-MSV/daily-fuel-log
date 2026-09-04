@@ -280,9 +280,59 @@
 }
 .tracker-root .ring-wrap {
   position: relative;
-  width: 84px;
-  height: 84px;
+  width: 68px;
+  height: 68px;
   margin-bottom: 6px;
+}
+.tracker-root .scoreboard-secondary {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---- Day hero: the single focal "today" score ---- */
+.tracker-root .day-hero {
+  background: radial-gradient(120% 140% at 50% -10%, rgba(242, 237, 226, 0.07), transparent 60%),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 3px solid var(--cal);
+  padding: 22px 16px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: center;
+}
+.tracker-root .ring-tile-hero {
+  padding: 0;
+}
+.tracker-root .ring-tile-hero .ring-wrap {
+  width: 176px;
+  height: 176px;
+  margin-bottom: 10px;
+}
+.tracker-root .ring-tile-hero .ring-center .val {
+  font-size: 52px;
+}
+.tracker-root .ring-tile-hero .ring-unit {
+  font-size: 13px;
+}
+.tracker-root .ring-tile-hero .lbl {
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.tracker-root .ring-tile-hero .target {
+  font-size: 12px;
+}
+.tracker-root .hero-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+/* Hero size without a target set (no ring rendered) — enlarge the flat number */
+.tracker-root .score-tile.ring-tile-hero:not(.ring-tile) {
+  text-align: center;
+  padding: 8px 16px;
+}
+.tracker-root .score-tile.ring-tile-hero:not(.ring-tile) .val {
+  font-size: 56px;
 }
 .tracker-root .ring-svg {
   width: 100%;
@@ -321,7 +371,7 @@
   justify-content: center;
 }
 .tracker-root .ring-center .val {
-  font-size: 24px;
+  font-size: 19px;
 }
 .tracker-root .ring-unit {
   font-size: 10px;

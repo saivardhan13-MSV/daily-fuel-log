@@ -42,6 +42,12 @@ export default async function Home(props: PageProps<"/">) {
   const proteinGoalMet =
     targets?.target_protein != null && totals.protein >= targets.target_protein;
 
+  let heroSubtitle: string | undefined;
+  if (targets?.target_calories != null) {
+    const remaining = Math.round(targets.target_calories - totals.cal);
+    heroSubtitle = remaining >= 0 ? `${remaining} cal left today` : `${-remaining} cal over today`;
+  }
+
   return (
     <div className="tracker-root">
       <div className="page-shell">
@@ -56,13 +62,18 @@ export default async function Home(props: PageProps<"/">) {
               <div className="milestone-banner">🎉 Protein goal reached for today!</div>
             )}
 
-            <div className="scoreboard">
+            <div className="day-hero">
               <ScoreTile
                 cls="cal"
                 label="Calories"
                 value={Math.round(totals.cal)}
                 target={targets?.target_calories}
+                size="hero"
+                subtitle={heroSubtitle}
               />
+            </div>
+
+            <div className="scoreboard scoreboard-secondary">
               <ScoreTile
                 cls="protein"
                 label="Protein"
