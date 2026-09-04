@@ -13,11 +13,22 @@
   --workout: #c9e265;
   --danger: #c5644a;
 
-  background: var(--bg);
   color: var(--text);
   font-family: var(--font-work-sans), -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+
+  /* Layered atmosphere instead of a flat fill: a warm glow anchored where the
+     hero card sits, a cooler glow lower down, a faint grid for texture, all
+     over the base color. Purely decorative — fixed so it doesn't repeat or
+     scroll oddly with page height. */
+  background-color: var(--bg);
+  background-image: radial-gradient(70% 50% at 50% 0%, rgba(232, 185, 74, 0.07), transparent 65%),
+    radial-gradient(60% 45% at 85% 45%, rgba(78, 158, 148, 0.05), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: auto, auto, 34px 34px, 34px 34px;
+  background-attachment: fixed;
 }
 .tracker-root * {
   box-sizing: border-box;
@@ -99,7 +110,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-bottom: 2px solid var(--protein);
-  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   margin-bottom: 18px;
   padding: 14px 16px;
 }
@@ -164,11 +175,12 @@
   color: var(--text);
 }
 .tracker-root .view-toggle a.active {
-  background: var(--protein);
+  background: linear-gradient(180deg, #f0c968, var(--protein));
   color: #241c05;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .tracker-root .view-toggle a.active:hover {
-  background: var(--protein);
+  background: linear-gradient(180deg, #f0c968, var(--protein));
   color: #241c05;
 }
 
@@ -249,6 +261,7 @@
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
   margin-bottom: 22px;
 }
 .tracker-root .score-tile {
@@ -294,6 +307,7 @@
     var(--surface);
   border: 1px solid var(--line);
   border-bottom: 3px solid var(--cal);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: 22px 16px 20px;
   margin-bottom: 14px;
   display: flex;
@@ -352,15 +366,22 @@
 }
 .tracker-root .score-tile.cal .ring-fill {
   stroke: var(--cal);
+  filter: drop-shadow(0 0 6px rgba(242, 237, 226, 0.45));
 }
 .tracker-root .score-tile.protein .ring-fill {
   stroke: var(--protein);
+  filter: drop-shadow(0 0 6px rgba(232, 185, 74, 0.5));
 }
 .tracker-root .score-tile.carbs .ring-fill {
   stroke: var(--carbs);
+  filter: drop-shadow(0 0 6px rgba(78, 158, 148, 0.5));
 }
 .tracker-root .score-tile.fat .ring-fill {
   stroke: var(--fat);
+  filter: drop-shadow(0 0 6px rgba(197, 100, 74, 0.5));
+}
+.tracker-root .ring-tile-hero .ring-wrap {
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.5));
 }
 .tracker-root .ring-center {
   position: absolute;
@@ -409,6 +430,20 @@
   background: var(--surface);
   border: 1px solid var(--line);
   margin-bottom: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tracker-root .section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tracker-root .section {
+    transition: none;
+  }
+  .tracker-root .section:hover {
+    transform: none;
+  }
 }
 .tracker-root .section-enter {
   animation: section-fade-in 0.35s ease backwards;
@@ -644,8 +679,9 @@
   margin-left: 4px;
 }
 .tracker-root .add-row button.add-btn {
-  background: var(--protein);
+  background: linear-gradient(180deg, #f0c968, var(--protein));
   border: none;
+  box-shadow: 0 2px 8px rgba(232, 185, 74, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   color: #241c05;
   font-weight: 700;
   padding: 8px 16px;
@@ -653,8 +689,9 @@
   cursor: pointer;
   font-family: inherit;
 }
-.tracker-root .add-row button.add-btn:hover {
-  opacity: 0.9;
+.tracker-root .add-row button.add-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(232, 185, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .tracker-root .add-row button.add-btn:disabled {
   opacity: 0.5;
@@ -808,6 +845,7 @@
 .tracker-root .history {
   background: var(--surface);
   border: 1px solid var(--line);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   padding: 16px;
 }
 .tracker-root .hist-nav {
@@ -921,6 +959,7 @@
 .tracker-root .water-widget {
   background: var(--surface);
   border: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   padding: 14px 16px;
   width: 100%;
   margin-bottom: 14px;
@@ -1010,8 +1049,9 @@
   margin-bottom: 8px;
 }
 .tracker-root .water-buttons button {
-  background: var(--surface-alt);
+  background: linear-gradient(180deg, var(--surface-alt), var(--surface));
   border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   color: var(--text);
   padding: 7px 8px;
   font-size: 12px;
@@ -1022,6 +1062,7 @@
 .tracker-root .water-buttons button:hover {
   border-color: var(--carbs);
   color: var(--carbs);
+  box-shadow: 0 2px 8px rgba(78, 158, 148, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 .tracker-root .water-buttons button:disabled {
   opacity: 0.5;
