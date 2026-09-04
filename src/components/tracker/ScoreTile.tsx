@@ -1,3 +1,5 @@
+import AnimatedHeroRing from "./AnimatedHeroRing";
+
 export default function ScoreTile({
   cls,
   label,
@@ -37,25 +39,29 @@ export default function ScoreTile({
 
   return (
     <div className={`score-tile ring-tile${sizeClass} ${cls}`}>
-      <div className="ring-wrap">
-        <svg viewBox="0 0 100 100" className="ring-svg">
-          <circle cx="50" cy="50" r={radius} className="ring-track" />
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            className="ring-fill"
-            style={{
-              strokeDasharray: circumference,
-              strokeDashoffset: offset,
-            }}
-          />
-        </svg>
-        <div className="ring-center">
-          <div className="val display">{value}</div>
-          {unit && <div className="ring-unit">{unit}</div>}
+      {size === "hero" ? (
+        <AnimatedHeroRing value={value} pct={pct} unit={unit} />
+      ) : (
+        <div className="ring-wrap">
+          <svg viewBox="0 0 100 100" className="ring-svg">
+            <circle cx="50" cy="50" r={radius} className="ring-track" />
+            <circle
+              cx="50"
+              cy="50"
+              r={radius}
+              className="ring-fill"
+              style={{
+                strokeDasharray: circumference,
+                strokeDashoffset: offset,
+              }}
+            />
+          </svg>
+          <div className="ring-center">
+            <div className="val display">{value}</div>
+            {unit && <div className="ring-unit">{unit}</div>}
+          </div>
         </div>
-      </div>
+      )}
       <div className="lbl">{label}</div>
       <div className="target">
         of {target}

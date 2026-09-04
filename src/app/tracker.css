@@ -28,7 +28,22 @@
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: auto, auto, 34px 34px, 34px 34px;
+  background-position: 0% 0%, 0% 0%, 0 0, 0 0;
   background-attachment: fixed;
+  animation: ambient-drift 34s ease-in-out infinite alternate;
+}
+@keyframes ambient-drift {
+  from {
+    background-position: 0% 0%, 0% 0%, 0 0, 0 0;
+  }
+  to {
+    background-position: 5% 4%, -5% -3%, 10px 6px, 10px 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tracker-root {
+    animation: none;
+  }
 }
 .tracker-root * {
   box-sizing: border-box;
@@ -363,6 +378,10 @@
   stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s ease;
+}
+.tracker-root .ring-fill-animated {
+  /* Driven frame-by-frame by JS (AnimatedHeroRing), not a CSS transition. */
+  transition: none;
 }
 .tracker-root .score-tile.cal .ring-fill {
   stroke: var(--cal);

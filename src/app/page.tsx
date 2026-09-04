@@ -16,6 +16,7 @@ import ClearDayButton from "@/components/tracker/ClearDayButton";
 import ScoreTile from "@/components/tracker/ScoreTile";
 import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
+import TiltCard from "@/components/tracker/TiltCard";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
@@ -62,7 +63,7 @@ export default async function Home(props: PageProps<"/">) {
               <div className="milestone-banner">🎉 Protein goal reached for today!</div>
             )}
 
-            <div className="day-hero">
+            <TiltCard className="day-hero">
               <ScoreTile
                 cls="cal"
                 label="Calories"
@@ -71,7 +72,7 @@ export default async function Home(props: PageProps<"/">) {
                 size="hero"
                 subtitle={heroSubtitle}
               />
-            </div>
+            </TiltCard>
 
             <div className="scoreboard scoreboard-secondary">
               <ScoreTile
