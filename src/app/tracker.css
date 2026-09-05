@@ -1090,3 +1090,165 @@
     font-size: 28px;
   }
 }
+
+/* ---- Login / signup ---- */
+.tracker-root .login-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  min-height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+.tracker-root .login-brand {
+  flex: 1 1 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.tracker-root .login-logo {
+  font-size: 44px;
+  line-height: 1;
+  margin: 0 0 6px;
+}
+.tracker-root .login-tag {
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+.tracker-root .login-pitch {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 380px;
+  margin: 0;
+}
+.tracker-root .login-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.tracker-root .login-preview .score-tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom: 3px solid var(--cal);
+  padding: 20px 26px;
+  width: fit-content;
+}
+.tracker-root .login-preview-caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.tracker-root .login-card {
+  flex: 1 1 360px;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--protein);
+  padding: 32px 28px;
+}
+.tracker-root .login-card-title {
+  font-size: 28px;
+  display: block;
+}
+.tracker-root .login-card-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 4px 0 20px;
+}
+.tracker-root .login-banner {
+  font-size: 12.5px;
+  padding: 9px 12px;
+  margin-bottom: 14px;
+  border: 1px solid;
+}
+.tracker-root .login-banner-error {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(197, 100, 74, 0.1);
+}
+.tracker-root .login-banner-ok {
+  border-color: var(--workout);
+  color: var(--workout);
+  background: rgba(201, 226, 101, 0.08);
+}
+.tracker-root .login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tracker-root .login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tracker-root .login-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.tracker-root .login-input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-family: inherit;
+}
+.tracker-root .login-input:focus {
+  outline: none;
+  border-color: var(--protein);
+}
+.tracker-root .login-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.tracker-root .login-submit {
+  flex: 1;
+  text-align: center;
+}
+.tracker-root .login-secondary {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px 16px;
+}
+.tracker-root .login-secondary:hover {
+  border-color: var(--protein);
+  color: var(--protein);
+}
+.tracker-root .login-disclaimer {
+  margin: 24px 0 0;
+  padding-top: 14px;
+}
+@media (max-width: 860px) {
+  .tracker-root .login-shell {
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 20px;
+    min-height: auto;
+  }
+  .tracker-root .login-brand {
+    align-items: center;
+    text-align: center;
+  }
+  .tracker-root .login-pitch {
+    max-width: none;
+  }
+  .tracker-root .login-preview {
+    align-items: center;
+  }
+  .tracker-root .login-card {
+    width: 100%;
+    max-width: 380px;
+  }
+}
