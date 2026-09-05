@@ -98,14 +98,13 @@ export default async function Home(props: PageProps<"/">) {
               />
             </div>
 
-            {SECTIONS.map((section, i) => (
+            {SECTIONS.map((section) => (
               <MealSection
                 key={section.key}
                 section={section}
                 items={entries[section.key]}
                 date={date}
                 customFoods={customFoods}
-                animationIndex={i}
               />
             ))}
 
