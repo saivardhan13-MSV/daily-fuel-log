@@ -61,120 +61,106 @@ export default function TargetsForm({ existing }: { existing: BodyTargetsRow | n
       <div className="section-head">
         <span className="name display">Your Details</span>
       </div>
-      <div className="items" style={{ paddingBottom: 14 }}>
-        <div className="custom-panel show" style={{ borderTop: "none", paddingTop: 12 }}>
-          <span className="hint">Weight (kg)</span>
-          <input
-            type="number"
-            value={weightKg}
-            onChange={(e) => setWeightKg(e.target.value)}
-            style={{ width: 90 }}
-          />
-          <span className="hint" style={{ width: "auto", marginBottom: 0 }}>
-            Height (cm)
-          </span>
-          <input
-            type="number"
-            value={heightCm}
-            onChange={(e) => setHeightCm(e.target.value)}
-            style={{ width: 90 }}
-          />
-          <span className="hint" style={{ width: "auto", marginBottom: 0 }}>
-            Age
-          </span>
-          <input
-            type="number"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            style={{ width: 70 }}
-          />
-        </div>
-
-        <div style={{ marginTop: 6 }}>
-          <div className="hint" style={{ marginBottom: 6 }}>
-            Sex (used only for the BMR calorie formula)
-          </div>
-          <div className="unit-toggle" style={{ marginBottom: 14 }}>
-            <button
-              type="button"
-              className={sex === "male" ? "active" : ""}
-              onClick={() => setSex("male")}
-            >
-              Male
-            </button>
-            <button
-              type="button"
-              className={sex === "female" ? "active" : ""}
-              onClick={() => setSex("female")}
-            >
-              Female
-            </button>
-          </div>
-
-          <div className="hint" style={{ marginBottom: 6 }}>
-            Activity level
-          </div>
-          <select
-            value={activityLevel}
-            onChange={(e) => setActivityLevel(e.target.value as ActivityLevel)}
-            style={{
-              background: "var(--bg)",
-              border: "1px solid var(--line)",
-              color: "var(--text)",
-              padding: "8px 10px",
-              fontSize: 13,
-              width: "100%",
-              marginBottom: 14,
-            }}
-          >
-            {ACTIVITY_LEVELS.map((level) => (
-              <option key={level} value={level}>
-                {ACTIVITY_LABELS[level]}
-              </option>
-            ))}
-          </select>
-
-          <div className="hint" style={{ marginBottom: 6 }}>
-            Goal
-          </div>
-          <div className="unit-toggle" style={{ marginBottom: 14 }}>
-            <button
-              type="button"
-              className={goal === "cut" ? "active" : ""}
-              onClick={() => setGoal("cut")}
-            >
-              Cut
-            </button>
-            <button
-              type="button"
-              className={goal === "maintain" ? "active" : ""}
-              onClick={() => setGoal("maintain")}
-            >
-              Maintain
-            </button>
-            <button
-              type="button"
-              className={goal === "bulk" ? "active" : ""}
-              onClick={() => setGoal("bulk")}
-            >
-              Bulk
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="add-btn"
-            disabled={submitting}
-            onClick={handleSubmit}
-          >
-            {submitting ? "Saving…" : "Save & calculate targets"}
-          </button>
-          {error && (
-            <div className="save-note" style={{ color: "var(--danger)" }}>
-              {error}
+      <div className="items tgt-items">
+        <div className="tgt-form">
+          <div className="tgt-row">
+            <div className="tgt-field">
+              <label htmlFor="tgt-weight">Weight (kg)</label>
+              <input
+                id="tgt-weight"
+                type="number"
+                value={weightKg}
+                onChange={(e) => setWeightKg(e.target.value)}
+              />
             </div>
-          )}
-          {saved && !error && <div className="save-note">Saved</div>}
+            <div className="tgt-field">
+              <label htmlFor="tgt-height">Height (cm)</label>
+              <input
+                id="tgt-height"
+                type="number"
+                value={heightCm}
+                onChange={(e) => setHeightCm(e.target.value)}
+              />
+            </div>
+            <div className="tgt-field">
+              <label htmlFor="tgt-age">Age</label>
+              <input id="tgt-age" type="number" value={age} onChange={(e) => setAge(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="tgt-field">
+            <label>Sex (used only for the BMR calorie formula)</label>
+            <div className="unit-toggle tgt-toggle">
+              <button
+                type="button"
+                className={sex === "male" ? "active" : ""}
+                onClick={() => setSex("male")}
+              >
+                Male
+              </button>
+              <button
+                type="button"
+                className={sex === "female" ? "active" : ""}
+                onClick={() => setSex("female")}
+              >
+                Female
+              </button>
+            </div>
+          </div>
+
+          <div className="tgt-field">
+            <label htmlFor="tgt-activity">Activity level</label>
+            <select
+              id="tgt-activity"
+              value={activityLevel}
+              onChange={(e) => setActivityLevel(e.target.value as ActivityLevel)}
+            >
+              {ACTIVITY_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {ACTIVITY_LABELS[level]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="tgt-field">
+            <label>Goal</label>
+            <div className="unit-toggle tgt-toggle">
+              <button
+                type="button"
+                className={goal === "cut" ? "active" : ""}
+                onClick={() => setGoal("cut")}
+              >
+                Cut
+              </button>
+              <button
+                type="button"
+                className={goal === "maintain" ? "active" : ""}
+                onClick={() => setGoal("maintain")}
+              >
+                Maintain
+              </button>
+              <button
+                type="button"
+                className={goal === "bulk" ? "active" : ""}
+                onClick={() => setGoal("bulk")}
+              >
+                Bulk
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <button type="button" className="add-btn" disabled={submitting} onClick={handleSubmit}>
+              {submitting ? "Saving…" : "Save & calculate targets"}
+            </button>
+            {error && (
+              <div className="save-note" style={{ color: "var(--danger)" }}>
+                {error}
+              </div>
+            )}
+            {saved && !error && <div className="save-note">Saved</div>}
+          </div>
         </div>
       </div>
     </div>

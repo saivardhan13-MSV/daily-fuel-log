@@ -18,38 +18,56 @@ export default async function TargetsPage() {
     getStreak(supabase, user.id),
   ]);
 
+  const hasTargets = targets?.target_calories != null;
+  let proteinPct = 0;
+  let carbsPct = 0;
+  let fatPct = 0;
+  if (hasTargets) {
+    const proteinCal = (targets!.target_protein ?? 0) * 4;
+    const carbsCal = (targets!.target_carbs ?? 0) * 4;
+    const fatCal = (targets!.target_fat ?? 0) * 9;
+    const total = proteinCal + carbsCal + fatCal || 1;
+    proteinPct = (proteinCal / total) * 100;
+    carbsPct = (carbsCal / total) * 100;
+    fatPct = (fatCal / total) * 100;
+  }
+
   return (
     <div className="tracker-root">
       <div className="app">
         <Topbar active="targets" userEmail={user.email} streak={streak} />
+
+        <div className="targets-hero">
+          <span className="display targets-hero-title">Your Targets</span>
+          <p className="targets-hero-sub">
+            Bodyweight-based calorie and macro goals, calculated once from your
+            details below — update them any time your weight or routine changes.
+          </p>
+        </div>
+
         <TargetsDisclaimer />
 
-        {targets?.target_calories != null && (
-          <div className="scoreboard">
-            <div className="score-tile cal">
-              <div className="val display">{targets.target_calories}</div>
-              <div className="lbl">Calorie Target</div>
+        {hasTargets && (
+          <div className="macro-split-card">
+            <div className="macro-split-cal">
+              <span className="val display">{targets!.target_calories}</span>
+              <span className="lbl">calorie target / day</span>
             </div>
-            <div className="score-tile protein">
-              <div className="val display">
-                {targets.target_protein}
-                <span style={{ fontSize: 16 }}>g</span>
-              </div>
-              <div className="lbl">Protein Target</div>
+            <div className="macro-split-bar">
+              <span style={{ width: `${proteinPct}%`, background: "var(--protein)" }} />
+              <span style={{ width: `${carbsPct}%`, background: "var(--carbs)" }} />
+              <span style={{ width: `${fatPct}%`, background: "var(--fat)" }} />
             </div>
-            <div className="score-tile carbs">
-              <div className="val display">
-                {targets.target_carbs}
-                <span style={{ fontSize: 16 }}>g</span>
-              </div>
-              <div className="lbl">Carbs Target</div>
-            </div>
-            <div className="score-tile fat">
-              <div className="val display">
-                {targets.target_fat}
-                <span style={{ fontSize: 16 }}>g</span>
-              </div>
-              <div className="lbl">Fat Target</div>
+            <div className="macro-split-legend">
+              <span>
+                <i style={{ background: "var(--protein)" }} /> Protein {targets!.target_protein}g
+              </span>
+              <span>
+                <i style={{ background: "var(--carbs)" }} /> Carbs {targets!.target_carbs}g
+              </span>
+              <span>
+                <i style={{ background: "var(--fat)" }} /> Fat {targets!.target_fat}g
+              </span>
             </div>
           </div>
         )}
