@@ -3,11 +3,6 @@ import { login, signup } from "./actions";
 import Logomark from "@/components/tracker/Logomark";
 import "../tracker.css";
 
-const RADIUS = 40;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const PREVIEW_PCT = 78;
-const PREVIEW_OFFSET = CIRCUMFERENCE * (1 - PREVIEW_PCT / 100);
-
 export default async function LoginPage(props: PageProps<"/login">) {
   const searchParams = await props.searchParams;
   const error = typeof searchParams.error === "string" ? searchParams.error : null;
@@ -17,45 +12,32 @@ export default async function LoginPage(props: PageProps<"/login">) {
     <div className="tracker-root">
       <div className="login-shell">
         <div className="login-brand">
-          <div>
-            <div className="login-logo-row">
-              <Logomark size={34} />
-              <div className="display login-logo">Daily Fuel Log</div>
-            </div>
-            <p className="tag login-tag">track every plate, every day</p>
-            <p className="login-pitch">
-              Log meals in seconds, watch your macros fill in real time, and see
-              exactly how today adds up against your goal.
-            </p>
+          <div className="login-logo-row">
+            <Logomark size={36} />
+            <div className="display login-logo">Daily Fuel Log</div>
           </div>
-
-          <div className="login-preview" aria-hidden="true">
-            <div className="score-tile ring-tile ring-tile-hero cal">
-              <div className="ring-wrap">
-                <svg viewBox="0 0 100 100" className="ring-svg">
-                  <circle cx="50" cy="50" r={RADIUS} className="ring-track" />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r={RADIUS}
-                    className="ring-fill"
-                    style={{ strokeDasharray: CIRCUMFERENCE, strokeDashoffset: PREVIEW_OFFSET }}
-                  />
-                </svg>
-                <div className="ring-center">
-                  <div className="val display">1847</div>
-                </div>
-              </div>
-              <div className="lbl">Calories</div>
-              <div className="target">of 2200</div>
-            </div>
-            <span className="login-preview-caption">a look at your daily dashboard</span>
-          </div>
+          <p className="login-pitch">
+            Log meals in seconds, watch your macros fill in real time, and see
+            exactly how today adds up against your goal.
+          </p>
+          <ul className="login-macro-list" aria-hidden="true">
+            <li>
+              <i className="login-macro-dot" style={{ background: "var(--protein)" }} />
+              Protein
+            </li>
+            <li>
+              <i className="login-macro-dot" style={{ background: "var(--carbs)" }} />
+              Carbs
+            </li>
+            <li>
+              <i className="login-macro-dot" style={{ background: "var(--fat)" }} />
+              Fat
+            </li>
+          </ul>
         </div>
 
         <div className="login-card">
-          <span className="name display login-card-title">Sign In</span>
-          <p className="login-card-sub">or create a new account below</p>
+          <span className="name display login-card-title">Welcome back</span>
 
           {error && <p className="login-banner login-banner-error">{error}</p>}
           {message && <p className="login-banner login-banner-ok">{message}</p>}
@@ -80,14 +62,12 @@ export default async function LoginPage(props: PageProps<"/login">) {
                 className="login-input"
               />
             </div>
-            <div className="login-actions">
-              <button formAction={login} className="add-btn login-submit">
-                Sign in
-              </button>
-              <button formAction={signup} className="login-secondary">
-                Sign up
-              </button>
-            </div>
+            <button formAction={login} className="add-btn login-submit">
+              Sign in
+            </button>
+            <button formAction={signup} className="login-secondary">
+              Don&rsquo;t have an account? Sign up
+            </button>
           </form>
 
           <p className="disclaimer-footer login-disclaimer">

@@ -13,10 +13,10 @@ import Topbar from "@/components/tracker/Topbar";
 import DateNav from "@/components/tracker/DateNav";
 import MealSection from "@/components/tracker/MealSection";
 import ClearDayButton from "@/components/tracker/ClearDayButton";
-import ScoreTile from "@/components/tracker/ScoreTile";
+import CalorieHero from "@/components/tracker/CalorieHero";
+import MacroStrip from "@/components/tracker/MacroStrip";
 import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
-import TiltCard from "@/components/tracker/TiltCard";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
@@ -40,14 +40,9 @@ export default async function Home(props: PageProps<"/">) {
   ]);
 
   const totals = totalsForEntries(entries);
+  const hasEntries = Object.values(entries).some((items) => items.length > 0);
   const proteinGoalMet =
     targets?.target_protein != null && totals.protein >= targets.target_protein;
-
-  let heroSubtitle: string | undefined;
-  if (targets?.target_calories != null) {
-    const remaining = Math.round(targets.target_calories - totals.cal);
-    heroSubtitle = remaining >= 0 ? `${remaining} cal left today` : `${-remaining} cal over today`;
-  }
 
   return (
     <div className="tracker-root">
@@ -60,53 +55,36 @@ export default async function Home(props: PageProps<"/">) {
             <DateNav date={date} />
 
             {proteinGoalMet && (
-              <div className="milestone-banner">🎉 Protein goal reached for today!</div>
+              <div className="milestone-banner">Protein goal reached for today.</div>
             )}
 
-            <TiltCard className="day-hero">
-              <ScoreTile
-                cls="cal"
-                label="Calories"
-                value={Math.round(totals.cal)}
-                target={targets?.target_calories}
-                size="hero"
-                subtitle={heroSubtitle}
-              />
-            </TiltCard>
+            <CalorieHero
+              consumed={Math.round(totals.cal)}
+              target={targets?.target_calories}
+              loggedAnything={hasEntries}
+            />
 
-            <div className="scoreboard scoreboard-secondary">
-              <ScoreTile
-                cls="protein"
-                label="Protein"
-                value={round1(totals.protein)}
-                unit="g"
-                target={targets?.target_protein}
+            {targets?.target_calories != null && (
+              <MacroStrip
+                items={[
+                  { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
+                  { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
+                  { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
+                ]}
               />
-              <ScoreTile
-                cls="carbs"
-                label="Carbs"
-                value={round1(totals.carbs)}
-                unit="g"
-                target={targets?.target_carbs}
-              />
-              <ScoreTile
-                cls="fat"
-                label="Fat"
-                value={round1(totals.fat)}
-                unit="g"
-                target={targets?.target_fat}
-              />
+            )}
+
+            <div id="today-log" className="meal-log">
+              {SECTIONS.map((section) => (
+                <MealSection
+                  key={section.key}
+                  section={section}
+                  items={entries[section.key]}
+                  date={date}
+                  customFoods={customFoods}
+                />
+              ))}
             </div>
-
-            {SECTIONS.map((section) => (
-              <MealSection
-                key={section.key}
-                section={section}
-                items={entries[section.key]}
-                date={date}
-                customFoods={customFoods}
-              />
-            ))}
 
             <ClearDayButton date={date} />
             <FooterDisclaimer />

@@ -62,19 +62,19 @@ export default function Topbar({
         <div className="view-toggle">
           <Link href="/" className={active === "tracker" ? "active" : ""}>
             <IconToday />
-            Today
+            <span className="link-label">Today</span>
           </Link>
           <Link href="/history" className={active === "history" ? "active" : ""}>
             <IconHistory />
-            History
+            <span className="link-label">History</span>
           </Link>
           <Link href="/trends" className={active === "trends" ? "active" : ""}>
             <IconTrends />
-            Trends
+            <span className="link-label">Trends</span>
           </Link>
           <Link href="/targets" className={active === "targets" ? "active" : ""}>
             <IconTargets />
-            Targets
+            <span className="link-label">Targets</span>
           </Link>
         </div>
         <form action={signOut} className="account-row">

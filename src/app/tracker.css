@@ -13,6 +13,12 @@
   --workout: #c9e265;
   --danger: #c5644a;
 
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+
   color: var(--text);
   font-family: var(--font-work-sans), -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -158,50 +164,49 @@
 .tracker-root .topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-4);
 }
 
+/* Plain nav links, not a segmented button bar — the active item is marked
+   by weight/color and an underline, not a filled box. */
 .tracker-root .view-toggle {
   display: flex;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
+  align-items: center;
+  gap: var(--space-3);
 }
 .tracker-root .view-toggle a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: transparent;
+  background: none;
   border: none;
-  border-right: 1px solid var(--line);
+  border-bottom: 2px solid transparent;
   color: var(--text-muted);
   font-weight: 600;
   font-size: 13px;
-  padding: 9px 14px;
+  padding: 4px 2px;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
-.tracker-root .view-toggle a:last-child {
-  border-right: none;
+.tracker-root .view-toggle a svg {
+  opacity: 0.8;
 }
 .tracker-root .view-toggle a:hover {
-  background: var(--surface);
   color: var(--text);
 }
 .tracker-root .view-toggle a.active {
-  background: linear-gradient(180deg, #f0c968, var(--protein));
-  color: #241c05;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: var(--protein);
+  border-bottom-color: var(--protein);
 }
-.tracker-root .view-toggle a.active:hover {
-  background: linear-gradient(180deg, #f0c968, var(--protein));
-  color: #241c05;
+.tracker-root .view-toggle a.active svg {
+  opacity: 1;
 }
 
 .tracker-root .account-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .tracker-root .account-email {
   font-size: 11px;
@@ -210,52 +215,62 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-  flex: 1;
 }
 .tracker-root .signout-btn {
   background: transparent;
-  border: 1px solid var(--line);
+  border: none;
   color: var(--text-muted);
-  padding: 8px 14px;
+  padding: 4px 0;
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
 }
 .tracker-root .signout-btn:hover {
-  border-color: var(--danger);
   color: var(--danger);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .tracker-root .topbar {
-    padding: 12px 14px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .tracker-root .topbar-right {
     width: 100%;
-    flex-wrap: wrap;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 8px;
   }
   .tracker-root .view-toggle {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-width: 0;
   }
   .tracker-root .view-toggle a {
-    justify-content: center;
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    padding: 10px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
-  .tracker-root .view-toggle a:nth-child(2n) {
-    border-right: none;
+  .tracker-root .view-toggle a span.link-label {
+    display: none;
   }
-  .tracker-root .view-toggle a:nth-last-child(-n + 2) {
-    border-bottom: none;
+  .tracker-root .view-toggle a {
+    padding: 6px;
+  }
+  .tracker-root .view-toggle a svg {
+    width: 18px;
+    height: 18px;
   }
   .tracker-root .account-row {
-    width: 100%;
+    flex-shrink: 0;
+  }
+  .tracker-root .account-email {
+    display: none;
   }
 }
 
@@ -304,100 +319,11 @@
   font-family: inherit;
 }
 
-/* ---- Scoreboard ---- */
-.tracker-root .scoreboard {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr 1fr;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  margin-bottom: 22px;
-}
-.tracker-root .score-tile {
-  background: var(--surface);
-  padding: 14px 14px 12px;
-}
-.tracker-root .score-tile .val {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  font-size: 30px;
-  line-height: 1;
-}
-.tracker-root .score-tile .lbl {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
-  font-weight: 600;
-}
-.tracker-root .score-tile .target {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-.tracker-root .score-tile.ring-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 12px 8px 14px;
-}
+/* ---- Ring primitives (shared by CalorieHero's small ring) ---- */
 .tracker-root .ring-wrap {
   position: relative;
   width: 68px;
   height: 68px;
-  margin-bottom: 6px;
-}
-.tracker-root .scoreboard-secondary {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* ---- Day hero: the single focal "today" score ---- */
-.tracker-root .day-hero {
-  background: radial-gradient(120% 140% at 50% -10%, rgba(242, 237, 226, 0.07), transparent 60%),
-    var(--surface);
-  border: 1px solid var(--line);
-  border-bottom: 3px solid var(--cal);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  padding: 22px 16px 20px;
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: center;
-}
-.tracker-root .ring-tile-hero {
-  padding: 0;
-}
-.tracker-root .ring-tile-hero .ring-wrap {
-  width: 176px;
-  height: 176px;
-  margin-bottom: 10px;
-}
-.tracker-root .ring-tile-hero .ring-center .val {
-  font-size: 52px;
-}
-.tracker-root .ring-tile-hero .ring-unit {
-  font-size: 13px;
-}
-.tracker-root .ring-tile-hero .lbl {
-  font-size: 13px;
-  letter-spacing: 0.5px;
-}
-.tracker-root .ring-tile-hero .target {
-  font-size: 12px;
-}
-.tracker-root .hero-subtitle {
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-/* Hero size without a target set (no ring rendered) — enlarge the flat number */
-.tracker-root .score-tile.ring-tile-hero:not(.ring-tile) {
-  text-align: center;
-  padding: 8px 16px;
-}
-.tracker-root .score-tile.ring-tile-hero:not(.ring-tile) .val {
-  font-size: 56px;
 }
 .tracker-root .ring-svg {
   width: 100%;
@@ -411,6 +337,7 @@
 }
 .tracker-root .ring-fill {
   fill: none;
+  stroke: var(--cal);
   stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s ease;
@@ -418,18 +345,6 @@
 .tracker-root .ring-fill-animated {
   /* Driven frame-by-frame by JS (AnimatedHeroRing), not a CSS transition. */
   transition: none;
-}
-.tracker-root .score-tile.cal .ring-fill {
-  stroke: var(--cal);
-}
-.tracker-root .score-tile.protein .ring-fill {
-  stroke: var(--protein);
-}
-.tracker-root .score-tile.carbs .ring-fill {
-  stroke: var(--carbs);
-}
-.tracker-root .score-tile.fat .ring-fill {
-  stroke: var(--fat);
 }
 .tracker-root .ring-center {
   position: absolute;
@@ -440,48 +355,168 @@
   justify-content: center;
 }
 .tracker-root .ring-center .val {
-  font-size: 19px;
-}
-.tracker-root .ring-unit {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-top: -2px;
-}
-.tracker-root .ring-tile .lbl {
-  margin-top: 0;
-}
-.tracker-root .score-tile.cal .val {
-  color: var(--cal);
-}
-.tracker-root .score-tile.protein {
-  border-bottom: 3px solid var(--protein);
-}
-.tracker-root .score-tile.protein .val {
-  color: var(--protein);
-}
-.tracker-root .score-tile.carbs {
-  border-bottom: 3px solid var(--carbs);
-}
-.tracker-root .score-tile.carbs .val {
-  color: var(--carbs);
-}
-.tracker-root .score-tile.fat {
-  border-bottom: 3px solid var(--fat);
-}
-.tracker-root .score-tile.fat .val {
-  color: var(--fat);
+  font-size: 15px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
 }
 
-/* ---- Meal sections ----
-   Flat by design: seven near-identical cards don't each need their own
-   shadow/lift/entrance — that reads as templated. The accordion open/close
-   below is the section's one piece of motion, and it's purposeful (answers
-   a click), not decorative. */
+/* ---- Calorie hero: the one dominant number on the page ----
+   A document heading, not a card: no border, no background, just scale
+   and a hairline rule to close the section off from what follows. */
+.tracker-root .calorie-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .calorie-hero-ring {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+}
+.tracker-root .calorie-hero-ring .ring-wrap {
+  width: 100%;
+  height: 100%;
+}
+.tracker-root .calorie-hero-main {
+  min-width: 0;
+}
+.tracker-root .calorie-hero-number {
+  font-size: 56px;
+  line-height: 1;
+  color: var(--cal);
+}
+.tracker-root .calorie-hero-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 4px;
+}
+.tracker-root .calorie-hero-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .calorie-hero-nudge {
+  width: 100%;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.tracker-root .calorie-hero-nudge a {
+  color: var(--protein);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.tracker-root .calorie-hero-empty {
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .calorie-hero-empty-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  max-width: 440px;
+  margin: 0 0 var(--space-2);
+}
+.tracker-root .calorie-hero-cta {
+  display: inline-block;
+  color: var(--protein);
+  font-weight: 700;
+  font-size: 13.5px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 520px) {
+  .tracker-root .calorie-hero-number {
+    font-size: 44px;
+  }
+}
+
+/* ---- Macro strip: one unified row, not three cards ---- */
+.tracker-root .macro-strip {
+  display: flex;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .macro-strip-item {
+  flex: 1;
+  min-width: 0;
+}
+.tracker-root .macro-strip-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+.tracker-root .macro-strip-value {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .macro-strip-target {
+  font-family: var(--font-work-sans), sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+.tracker-root .macro-strip-bar {
+  display: block;
+  height: 3px;
+  background: var(--line);
+  margin-top: 8px;
+}
+.tracker-root .macro-strip-bar-fill {
+  display: block;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+.tracker-root .macro-strip-item.protein .macro-strip-value,
+.tracker-root .macro-strip-item.protein .macro-strip-bar-fill {
+  color: var(--protein);
+  background: var(--protein);
+}
+.tracker-root .macro-strip-item.carbs .macro-strip-value,
+.tracker-root .macro-strip-item.carbs .macro-strip-bar-fill {
+  color: var(--carbs);
+  background: var(--carbs);
+}
+.tracker-root .macro-strip-item.fat .macro-strip-value,
+.tracker-root .macro-strip-item.fat .macro-strip-bar-fill {
+  color: var(--fat);
+  background: var(--fat);
+}
+@media (max-width: 420px) {
+  .tracker-root .macro-strip {
+    gap: var(--space-3);
+  }
+  .tracker-root .macro-strip-value {
+    font-size: 17px;
+  }
+}
+
+/* ---- Meal log ----
+   A continuous ledger, not a stack of cards: each meal is a typographic
+   group separated by a hairline rule, not its own bordered/backgrounded
+   box. The accordion open/close is the log's one piece of motion, and
+   it's purposeful (answers a click), not decorative. */
+.tracker-root .meal-log {
+  border-top: 1px solid var(--line);
+}
 .tracker-root .section {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
 }
 .tracker-root .accordion-body {
   display: grid;
@@ -508,10 +543,9 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 10px 14px;
+  padding: var(--space-2) 2px;
   border: none;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-alt);
+  background: none;
   font-family: inherit;
   cursor: pointer;
   text-align: left;
@@ -529,7 +563,7 @@
 .tracker-root .section-head .name {
   font-family: var(--font-display), sans-serif;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 15px;
   letter-spacing: -0.2px;
 }
 .tracker-root .section-head .time {
@@ -552,14 +586,15 @@
   transform: rotate(180deg);
 }
 .tracker-root .section.workout .section-head {
-  border-left: 3px solid var(--workout);
+  border-left: 2px solid var(--workout);
+  padding-left: 8px;
 }
 .tracker-root .section.workout .section-head .name {
   color: var(--workout);
 }
 
 .tracker-root .items {
-  padding: 4px 14px;
+  padding: 0 2px var(--space-1);
 }
 .tracker-root .item-row-wrap {
   position: relative;
@@ -671,6 +706,25 @@
   font-style: italic;
 }
 
+/* Below ~480px there isn't room for name + 4 numeric columns on one line —
+   the name gets its own row instead of truncating to "Mas…". */
+@media (max-width: 480px) {
+  .tracker-root .item-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .tracker-root .item-row .iname {
+    flex-basis: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    font-weight: 600;
+  }
+  .tracker-root .item-head-row span:first-child {
+    display: none;
+  }
+}
+
 .tracker-root .add-row {
   display: flex;
   gap: 8px;
@@ -730,10 +784,11 @@
   text-decoration: underline;
   margin-left: 4px;
 }
-.tracker-root .add-row button.add-btn {
-  background: linear-gradient(180deg, #f0c968, var(--protein));
+/* Primary action button — solid fill, no gradient/glow. Used for the one
+   confident action in a given context (add food, sign in, save targets). */
+.tracker-root .add-btn {
+  background: var(--protein);
   border: none;
-  box-shadow: 0 2px 8px rgba(232, 185, 74, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   color: #241c05;
   font-weight: 700;
   padding: 8px 16px;
@@ -741,11 +796,10 @@
   cursor: pointer;
   font-family: inherit;
 }
-.tracker-root .add-row button.add-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(232, 185, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+.tracker-root .add-btn:hover:not(:disabled) {
+  background: #f0c968;
 }
-.tracker-root .add-row button.add-btn:disabled {
+.tracker-root .add-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -848,9 +902,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 16px;
-  padding: 8px 14px;
-  background: var(--surface-alt);
-  border-top: 1px solid var(--line);
+  padding: 6px 2px var(--space-2);
   font-size: 12px;
 }
 .tracker-root .section-total b {
@@ -1015,29 +1067,27 @@
 }
 
 .tracker-root .milestone-banner {
-  background: var(--surface);
-  border: 1px solid var(--workout);
+  border-left: 2px solid var(--workout);
   color: var(--workout);
   font-size: 13px;
   font-weight: 600;
-  padding: 10px 14px;
-  margin-bottom: 14px;
-  text-align: center;
+  padding: 6px 0 6px 10px;
+  margin-bottom: var(--space-3);
 }
 
-/* ---- Water intake widget ---- */
+/* ---- Water intake widget ----
+   Quiet and integrated, not a competing card — no border, no background,
+   just spacing to separate it from the meal log on desktop. */
 .tracker-root .water-widget {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  padding: 14px 16px;
   width: 100%;
-  margin-bottom: 14px;
 }
 .tracker-root .water-title {
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: var(--carbs);
-  margin-bottom: 8px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+  text-transform: none;
 }
 .tracker-root .water-gauge-row {
   display: flex;
@@ -1118,11 +1168,10 @@
   margin-bottom: 8px;
 }
 .tracker-root .water-buttons button {
-  background: linear-gradient(180deg, var(--surface-alt), var(--surface));
+  background: none;
   border: 1px solid var(--line);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   color: var(--text);
-  padding: 7px 8px;
+  padding: 7px 4px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -1131,7 +1180,6 @@
 .tracker-root .water-buttons button:hover {
   border-color: var(--carbs);
   color: var(--carbs);
-  box-shadow: 0 2px 8px rgba(78, 158, 148, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 .tracker-root .water-buttons button:disabled {
   opacity: 0.5;
@@ -1188,34 +1236,33 @@
   font-size: 40px;
   line-height: 1;
 }
-.tracker-root .login-tag {
-  font-size: 13px;
-  margin: 0 0 14px;
-}
 .tracker-root .login-pitch {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--text-muted);
   max-width: 380px;
   margin: 0;
 }
-.tracker-root .login-preview {
+.tracker-root .login-macro-list {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-4);
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
 }
-.tracker-root .login-preview .score-tile {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-bottom: 3px solid var(--cal);
-  padding: 20px 26px;
-  width: fit-content;
-}
-.tracker-root .login-preview-caption {
-  font-size: 11px;
+.tracker-root .login-macro-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted);
-  letter-spacing: 0.3px;
+}
+.tracker-root .login-macro-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
 }
 .tracker-root .login-card {
   flex: 1 1 360px;
@@ -1226,13 +1273,9 @@
   padding: 32px 28px;
 }
 .tracker-root .login-card-title {
-  font-size: 28px;
+  font-size: 26px;
   display: block;
-}
-.tracker-root .login-card-sub {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  margin: 4px 0 20px;
+  margin-bottom: 20px;
 }
 .tracker-root .login-banner {
   font-size: 12.5px;
@@ -1277,28 +1320,26 @@
   outline: none;
   border-color: var(--protein);
 }
-.tracker-root .login-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 6px;
-}
 .tracker-root .login-submit {
-  flex: 1;
+  width: 100%;
   text-align: center;
+  margin-top: 6px;
+  padding: 11px 16px;
 }
 .tracker-root .login-secondary {
-  flex: 1;
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--text);
-  font-weight: 700;
-  font-size: 13px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12.5px;
   cursor: pointer;
   font-family: inherit;
-  padding: 8px 16px;
+  padding: 10px 0 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .tracker-root .login-secondary:hover {
-  border-color: var(--protein);
   color: var(--protein);
 }
 .tracker-root .login-disclaimer {
@@ -1308,19 +1349,21 @@
 @media (max-width: 860px) {
   .tracker-root .login-shell {
     flex-direction: column;
+    justify-content: flex-start;
     gap: 32px;
     padding: 32px 20px;
     min-height: auto;
   }
   .tracker-root .login-brand {
+    flex: none;
     align-items: center;
     text-align: center;
   }
   .tracker-root .login-pitch {
     max-width: none;
   }
-  .tracker-root .login-preview {
-    align-items: center;
+  .tracker-root .login-macro-list {
+    justify-content: center;
   }
   .tracker-root .login-card {
     width: 100%;
@@ -1501,21 +1544,21 @@
   width: fit-content;
 }
 
-/* ---- Trends stats strip ---- */
+/* ---- Trends stats strip: one row, hairline dividers, no card grid ---- */
 .tracker-root .trend-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
 }
 .tracker-root .trend-stat {
-  background: var(--surface);
-  padding: 14px 16px;
+  flex: 1;
+  min-width: 120px;
 }
 .tracker-root .trend-stat .val {
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1;
   color: var(--text);
 }
