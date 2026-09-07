@@ -33,35 +33,10 @@ export default function ScoreTile({
   }
 
   const pct = Math.min(100, (value / target) * 100);
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - pct / 100);
 
   return (
     <div className={`score-tile ring-tile${sizeClass} ${cls}`}>
-      {size === "hero" ? (
-        <AnimatedHeroRing value={value} pct={pct} unit={unit} />
-      ) : (
-        <div className="ring-wrap">
-          <svg viewBox="0 0 100 100" className="ring-svg">
-            <circle cx="50" cy="50" r={radius} className="ring-track" />
-            <circle
-              cx="50"
-              cy="50"
-              r={radius}
-              className="ring-fill"
-              style={{
-                strokeDasharray: circumference,
-                strokeDashoffset: offset,
-              }}
-            />
-          </svg>
-          <div className="ring-center">
-            <div className="val display">{value}</div>
-            {unit && <div className="ring-unit">{unit}</div>}
-          </div>
-        </div>
-      )}
+      <AnimatedHeroRing value={value} pct={pct} unit={unit} decimals={1} />
       <div className="lbl">{label}</div>
       <div className="target">
         of {target}

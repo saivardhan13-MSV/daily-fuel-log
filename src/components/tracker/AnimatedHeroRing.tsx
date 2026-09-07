@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate } from "motion";
 
 const RADIUS = 40;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -13,32 +14,52 @@ export default function AnimatedHeroRing({
   value,
   pct,
   unit,
+  decimals = 0,
 }: {
   value: number;
   pct: number;
   unit?: string;
+  decimals?: number;
 }) {
-  const [progress, setProgress] = useState(() => (prefersReducedMotion() ? 1 : 0));
+  const reduced = prefersReducedMotion();
+  const [displayPct, setDisplayPct] = useState(() => (reduced ? pct : 0));
+  const [displayValue, setDisplayValue] = useState(() => (reduced ? value : 0));
+  const pctRef = useRef(displayPct);
+  const valueRef = useRef(displayValue);
 
   useEffect(() => {
-    if (prefersReducedMotion()) return;
+    if (reduced) return;
 
-    let raf = 0;
-    const duration = 800;
-    const start = performance.now();
+    const step = decimals === 1 ? 10 : 1;
 
-    function tick(now: number) {
-      const t = Math.min(1, (now - start) / duration);
-      setProgress(1 - Math.pow(1 - t, 3)); // ease-out cubic
-      if (t < 1) raf = requestAnimationFrame(tick);
-    }
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [value, pct]);
+    const pctAnim = animate(pctRef.current, pct, {
+      type: "spring",
+      stiffness: 90,
+      damping: 18,
+      onUpdate: (v) => {
+        pctRef.current = v;
+        setDisplayPct(v);
+      },
+    });
+    const valueAnim = animate(valueRef.current, value, {
+      type: "spring",
+      stiffness: 90,
+      damping: 18,
+      onUpdate: (v) => {
+        valueRef.current = v;
+        setDisplayValue(Math.round(v * step) / step);
+      },
+    });
 
-  const displayPct = pct * progress;
-  const offset = CIRCUMFERENCE * (1 - displayPct / 100);
-  const displayValue = Math.round(value * progress);
+    return () => {
+      pctAnim.stop();
+      valueAnim.stop();
+    };
+  }, [value, pct, decimals, reduced]);
+
+  const shownPct = reduced ? pct : displayPct;
+  const shownValue = reduced ? value : displayValue;
+  const offset = CIRCUMFERENCE * (1 - shownPct / 100);
 
   return (
     <div className="ring-wrap">
@@ -53,7 +74,7 @@ export default function AnimatedHeroRing({
         />
       </svg>
       <div className="ring-center">
-        <div className="val display">{displayValue}</div>
+        <div className="val display">{shownValue}</div>
         {unit && <div className="ring-unit">{unit}</div>}
       </div>
     </div>
