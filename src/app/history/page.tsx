@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMonthTotals, getStreak } from "@/lib/db";
+import { getMonthTotals, getStreak, getBodyTargets } from "@/lib/db";
 import { todayStr } from "@/lib/nutrition";
 import Topbar from "@/components/tracker/Topbar";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
@@ -29,11 +29,13 @@ export default async function HistoryPage(props: PageProps<"/history">) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [totals, streak] = await Promise.all([
+  const [totals, streak, targets] = await Promise.all([
     getMonthTotals(supabase, user.id, year, month),
     getStreak(supabase, user.id),
+    getBodyTargets(supabase, user.id),
   ]);
   const today = todayStr();
+  const targetCalories = targets?.target_calories ?? null;
 
   const first = new Date(year, month, 1);
   const startDow = first.getDay();
@@ -52,10 +54,16 @@ export default async function HistoryPage(props: PageProps<"/history">) {
     const dateStr = `${year}-${pad(month + 1)}-${pad(day)}`;
     const hasData = totals[dateStr] !== undefined;
     const cls = `cal-day${hasData ? " has-data" : ""}${dateStr === today ? " today-cell" : ""}`;
+    const fillPct = hasData && targetCalories ? Math.min(100, (totals[dateStr] / targetCalories) * 100) : null;
     cells.push(
       <Link href={`/?date=${dateStr}`} className={cls} key={dateStr}>
         <span className="dnum">{day}</span>
         {hasData && <span className="dcal">{Math.round(totals[dateStr])} cal</span>}
+        {fillPct != null && (
+          <span className="dbar-track">
+            <span className="dbar-fill" style={{ width: `${fillPct}%` }} />
+          </span>
+        )}
       </Link>,
     );
   }

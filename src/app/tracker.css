@@ -912,6 +912,19 @@
   outline: 2px solid var(--carbs);
   outline-offset: -2px;
 }
+.tracker-root .dbar-track {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  height: 3px;
+  background: var(--line);
+}
+.tracker-root .dbar-fill {
+  display: block;
+  height: 100%;
+  background: var(--protein);
+}
 
 /* ---- Disclaimers ---- */
 .tracker-root .disclaimer-footer {
@@ -1251,4 +1264,59 @@
     width: 100%;
     max-width: 380px;
   }
+}
+
+/* ---- About page ---- */
+.tracker-root .about-hero {
+  padding: 26px 4px 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.tracker-root .about-hero-title {
+  display: block;
+  font-size: 30px;
+  max-width: 560px;
+  line-height: 1.05;
+  color: var(--text);
+}
+.tracker-root .about-hero-sub {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 480px;
+}
+.tracker-root .about-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 20px 20px 22px;
+  margin-bottom: 14px;
+}
+.tracker-root .about-card-title {
+  display: block;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.tracker-root .about-body {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 640px;
+}
+.tracker-root .about-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.tracker-root .about-metric {
+  padding-left: 12px;
+  border-left: 2px solid var(--line);
+}
+.tracker-root .about-metric-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
