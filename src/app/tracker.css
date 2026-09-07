@@ -105,7 +105,6 @@
     flex-direction: column;
   }
   .tracker-root .page-body > .sidebar {
-    order: -1;
     position: static;
     width: 100%;
     flex-basis: auto;
