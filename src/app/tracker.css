@@ -207,6 +207,11 @@
 .tracker-root .account-email {
   font-size: 11px;
   color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 .tracker-root .signout-btn {
   background: transparent;
@@ -222,6 +227,37 @@
 .tracker-root .signout-btn:hover {
   border-color: var(--danger);
   color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .tracker-root .topbar {
+    padding: 12px 14px;
+  }
+  .tracker-root .topbar-right {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tracker-root .view-toggle {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tracker-root .view-toggle a {
+    justify-content: center;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 8px;
+  }
+  .tracker-root .view-toggle a:nth-child(2n) {
+    border-right: none;
+  }
+  .tracker-root .view-toggle a:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+  .tracker-root .account-row {
+    width: 100%;
+  }
 }
 
 /* ---- Date nav ---- */
