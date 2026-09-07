@@ -17,33 +17,7 @@
   font-family: var(--font-work-sans), -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-
-  /* Layered atmosphere instead of a flat fill: a warm glow anchored where the
-     hero card sits, a cooler glow lower down, a faint grid for texture, all
-     over the base color. Purely decorative — fixed so it doesn't repeat or
-     scroll oddly with page height. */
   background-color: var(--bg);
-  background-image: radial-gradient(70% 50% at 50% 0%, rgba(232, 185, 74, 0.07), transparent 65%),
-    radial-gradient(60% 45% at 85% 45%, rgba(78, 158, 148, 0.05), transparent 70%),
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: auto, auto, 34px 34px, 34px 34px;
-  background-position: 0% 0%, 0% 0%, 0 0, 0 0;
-  background-attachment: fixed;
-  animation: ambient-drift 34s ease-in-out infinite alternate;
-}
-@keyframes ambient-drift {
-  from {
-    background-position: 0% 0%, 0% 0%, 0 0, 0 0;
-  }
-  to {
-    background-position: 5% 4%, -5% -3%, 10px 6px, 10px 6px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tracker-root {
-    animation: none;
-  }
 }
 .tracker-root * {
   box-sizing: border-box;
@@ -67,8 +41,10 @@
   }
 }
 .tracker-root .display {
-  font-family: var(--font-bebas-neue), sans-serif;
-  letter-spacing: 0.5px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-wrap: balance;
 }
 
 .tracker-root .app {
@@ -130,12 +106,15 @@
 }
 .tracker-root .brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
+.tracker-root .logomark {
+  flex-shrink: 0;
+}
 .tracker-root .brand .display {
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
   color: var(--text);
 }
@@ -318,8 +297,10 @@
   padding: 14px 14px 12px;
 }
 .tracker-root .score-tile .val {
-  font-family: var(--font-bebas-neue), sans-serif;
-  font-size: 34px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  font-size: 30px;
   line-height: 1;
 }
 .tracker-root .score-tile .lbl {
@@ -419,22 +400,15 @@
 }
 .tracker-root .score-tile.cal .ring-fill {
   stroke: var(--cal);
-  filter: drop-shadow(0 0 6px rgba(242, 237, 226, 0.45));
 }
 .tracker-root .score-tile.protein .ring-fill {
   stroke: var(--protein);
-  filter: drop-shadow(0 0 6px rgba(232, 185, 74, 0.5));
 }
 .tracker-root .score-tile.carbs .ring-fill {
   stroke: var(--carbs);
-  filter: drop-shadow(0 0 6px rgba(78, 158, 148, 0.5));
 }
 .tracker-root .score-tile.fat .ring-fill {
   stroke: var(--fat);
-  filter: drop-shadow(0 0 6px rgba(197, 100, 74, 0.5));
-}
-.tracker-root .ring-tile-hero .ring-wrap {
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.5));
 }
 .tracker-root .ring-center {
   position: absolute;
@@ -532,9 +506,10 @@
   gap: 10px;
 }
 .tracker-root .section-head .name {
-  font-family: var(--font-bebas-neue), sans-serif;
-  font-size: 19px;
-  letter-spacing: 1px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.2px;
 }
 .tracker-root .section-head .time {
   font-size: 11px;
@@ -1156,10 +1131,15 @@
   flex-direction: column;
   gap: 32px;
 }
-.tracker-root .login-logo {
-  font-size: 44px;
-  line-height: 1;
+.tracker-root .login-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0 0 6px;
+}
+.tracker-root .login-logo {
+  font-size: 40px;
+  line-height: 1;
 }
 .tracker-root .login-tag {
   font-size: 13px;

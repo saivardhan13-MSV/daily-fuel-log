@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import Logomark from "@/components/tracker/Logomark";
 import "../tracker.css";
 
 const METRICS = [
@@ -36,7 +37,8 @@ export default async function AboutPage() {
       <div className="app">
         <div className="topbar">
           <div className="brand">
-            <span className="display">DAILY FUEL LOG</span>
+            <Logomark />
+            <span className="display">Daily Fuel Log</span>
             <span className="tag">track every plate, every day</span>
           </div>
           <Link href={user ? "/" : "/login"} className="today-btn" style={{ textDecoration: "none" }}>

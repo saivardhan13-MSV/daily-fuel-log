@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
+import Logomark from "./Logomark";
 
 function IconToday() {
   return (
@@ -48,7 +49,8 @@ export default function Topbar({
   return (
     <div className="topbar">
       <div className="brand">
-        <span className="display">DAILY FUEL LOG</span>
+        <Logomark />
+        <span className="display">Daily Fuel Log</span>
         <span className="tag">track every plate, every day</span>
         {streak != null && streak > 0 && (
           <span className="streak-badge" title={`${streak} day logging streak`}>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { login, signup } from "./actions";
+import Logomark from "@/components/tracker/Logomark";
 import "../tracker.css";
 
 const RADIUS = 40;
@@ -17,7 +18,10 @@ export default async function LoginPage(props: PageProps<"/login">) {
       <div className="login-shell">
         <div className="login-brand">
           <div>
-            <div className="display login-logo">DAILY FUEL LOG</div>
+            <div className="login-logo-row">
+              <Logomark size={34} />
+              <div className="display login-logo">Daily Fuel Log</div>
+            </div>
             <p className="tag login-tag">track every plate, every day</p>
             <p className="login-pitch">
               Log meals in seconds, watch your macros fill in real time, and see
