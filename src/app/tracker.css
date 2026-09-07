@@ -22,6 +22,27 @@
 .tracker-root * {
   box-sizing: border-box;
 }
+
+/* ---- Skeleton loading placeholders ---- */
+.tracker-root .skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-alt) 37%, var(--surface) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border: 1px solid var(--line);
+}
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tracker-root .skeleton {
+    animation: none;
+  }
+}
 .tracker-root button {
   transition: transform 0.1s ease, opacity 0.15s ease, border-color 0.15s ease,
     background 0.15s ease, color 0.15s ease;
@@ -540,16 +561,42 @@
 .tracker-root .items {
   padding: 4px 14px;
 }
+.tracker-root .item-row-wrap {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .item-row-wrap:last-child {
+  border-bottom: none;
+}
+.tracker-root .item-row-delete-backing {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 22px;
+  background: var(--danger);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
 .tracker-root .item-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 9px 0;
-  border-bottom: 1px solid var(--line);
   font-size: 13.5px;
+  background: var(--surface);
+  touch-action: pan-y;
+  cursor: grab;
 }
-.tracker-root .item-row:last-child {
-  border-bottom: none;
+.tracker-root .item-row:active {
+  cursor: grabbing;
 }
 .tracker-root .item-row .iname {
   flex: 1.4;

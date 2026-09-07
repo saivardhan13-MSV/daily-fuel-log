@@ -1,7 +1,7 @@
 import type { SectionConfig } from "@/lib/food-db";
 import { round1, totalsForItems, type EntryItem } from "@/lib/nutrition";
 import type { CustomFoodRow } from "@/lib/db";
-import RemoveButton from "./RemoveButton";
+import ItemsList from "./ItemsList";
 import AddItemRow from "./AddItemRow";
 import SectionAccordion from "./SectionAccordion";
 
@@ -33,31 +33,7 @@ export default function MealSection({
         }
       >
         <div className="items">
-          {items.length === 0 ? (
-            <div className="empty-row">Nothing logged yet</div>
-          ) : (
-            <>
-              <div className="item-head-row">
-                <span>Food</span>
-                <span className="q">grams</span>
-                <span>protein</span>
-                <span>carbs</span>
-                <span>fat</span>
-                <span className="sp" />
-              </div>
-              {items.map((it) => (
-                <div className="item-row" key={it.id}>
-                  <span className="iname">{it.food_name}</span>
-                  <span className="iqty">{it.qty_label}</span>
-                  <span className="imacro protein">{round1(it.protein)}</span>
-                  <span className="imacro carbs">{round1(it.carbs)}</span>
-                  <span className="imacro fat">{round1(it.fat)}</span>
-                  <RemoveButton id={it.id} />
-                </div>
-              ))}
-            </>
-          )}
-
+          <ItemsList items={items} />
           <AddItemRow section={section.key} date={date} customFoods={customFoods} />
         </div>
         <div className="section-total">
