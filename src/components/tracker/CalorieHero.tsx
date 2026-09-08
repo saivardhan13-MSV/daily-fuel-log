@@ -13,9 +13,9 @@ export default function CalorieHero({
   if (target == null) {
     return (
       <div className="calorie-hero calorie-hero-empty">
+        <div className="calorie-hero-empty-title display">Set up your daily target</div>
         <p className="calorie-hero-empty-text">
-          Your daily target isn&rsquo;t set yet. Set your calorie and macro targets to
-          start tracking your day.
+          You haven&rsquo;t set your calorie and macro targets yet.
         </p>
         <Link href="/targets" className="calorie-hero-cta">
           Set targets
@@ -39,15 +39,19 @@ export default function CalorieHero({
         </div>
         <div className="calorie-hero-label">{over ? "calories over today" : "calories remaining"}</div>
         <div className="calorie-hero-sub">
-          {consumed.toLocaleString()} of {target.toLocaleString()} kcal
+          <span>
+            <b>{target.toLocaleString()}</b> goal
+          </span>
+          <span>
+            <b>{consumed.toLocaleString()}</b> consumed
+          </span>
         </div>
+        {!loggedAnything && (
+          <p className="calorie-hero-nudge">
+            Nothing logged yet. <a href="#today-log">Add your first meal below.</a>
+          </p>
+        )}
       </div>
-      {!loggedAnything && (
-        <p className="calorie-hero-nudge">
-          Nothing logged yet.{" "}
-          <a href="#today-log">Add your first meal below.</a>
-        </p>
-      )}
     </div>
   );
 }

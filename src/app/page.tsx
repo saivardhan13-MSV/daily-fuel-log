@@ -46,54 +46,48 @@ export default async function Home(props: PageProps<"/">) {
 
   return (
     <div className="tracker-root">
-      <div className="page-shell">
+      <div className="app">
         <DateSync currentDate={date} hasExplicitDate={hasExplicitDate} />
         <Topbar active="tracker" userEmail={user.email} streak={streak} />
 
-        <div className="page-body">
-          <div className="app">
-            <DateNav date={date} />
+        <DateNav date={date} />
 
-            {proteinGoalMet && (
-              <div className="milestone-banner">Protein goal reached for today.</div>
-            )}
+        {proteinGoalMet && (
+          <div className="milestone-banner">Protein goal reached for today.</div>
+        )}
 
-            <CalorieHero
-              consumed={Math.round(totals.cal)}
-              target={targets?.target_calories}
-              loggedAnything={hasEntries}
+        <CalorieHero
+          consumed={Math.round(totals.cal)}
+          target={targets?.target_calories}
+          loggedAnything={hasEntries}
+        />
+
+        {targets?.target_calories != null && (
+          <MacroStrip
+            items={[
+              { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
+              { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
+              { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
+            ]}
+          />
+        )}
+
+        <div id="today-log" className="meal-log">
+          {SECTIONS.map((section) => (
+            <MealSection
+              key={section.key}
+              section={section}
+              items={entries[section.key]}
+              date={date}
+              customFoods={customFoods}
             />
-
-            {targets?.target_calories != null && (
-              <MacroStrip
-                items={[
-                  { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
-                  { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
-                  { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
-                ]}
-              />
-            )}
-
-            <div id="today-log" className="meal-log">
-              {SECTIONS.map((section) => (
-                <MealSection
-                  key={section.key}
-                  section={section}
-                  items={entries[section.key]}
-                  date={date}
-                  customFoods={customFoods}
-                />
-              ))}
-            </div>
-
-            <ClearDayButton date={date} />
-            <FooterDisclaimer />
-          </div>
-
-          <aside className="sidebar">
-            <WaterWidget date={date} amountMl={waterMl} />
-          </aside>
+          ))}
         </div>
+
+        <WaterWidget date={date} amountMl={waterMl} />
+
+        <ClearDayButton date={date} />
+        <FooterDisclaimer />
       </div>
     </div>
   );

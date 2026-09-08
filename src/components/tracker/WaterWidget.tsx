@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { addWater, resetWater } from "@/app/actions/water";
-import WaterGauge from "./WaterGauge";
 
 const QUICK_ADD = [250, 500, 1000];
 const DAILY_GOAL_ML = 3000;
@@ -35,16 +34,18 @@ export default function WaterWidget({ date, amountMl }: { date: string; amountMl
 
   return (
     <div className="water-widget">
-      <div className="water-title display">Water</div>
-
-      <div className="water-gauge-row">
-        <WaterGauge pct={pct} />
-        <div className="water-readout">
-          <div className="water-amount display">{liters}L</div>
-          <div className="water-goal">of {(DAILY_GOAL_ML / 1000).toFixed(1)}L</div>
-          {reachedGoal && <div className="water-goal-hit">🎉 goal hit</div>}
-        </div>
+      <div className="water-head">
+        <span className="water-title">Hydration</span>
+        <span className="water-readout">
+          {liters}
+          <span className="water-readout-goal">/{(DAILY_GOAL_ML / 1000).toFixed(1)} L</span>
+        </span>
       </div>
+
+      <span className="water-bar">
+        <span className="water-bar-fill" style={{ width: `${pct}%` }} />
+      </span>
+      {reachedGoal && <div className="water-goal-hit">Goal reached</div>}
 
       <div className="water-buttons">
         {QUICK_ADD.map((ml) => (
@@ -52,10 +53,10 @@ export default function WaterWidget({ date, amountMl }: { date: string; amountMl
             +{ml >= 1000 ? `${ml / 1000}L` : `${ml}ml`}
           </button>
         ))}
+        <button type="button" className="water-reset" disabled={isPending} onClick={handleReset}>
+          Reset
+        </button>
       </div>
-      <button type="button" className="water-reset" disabled={isPending} onClick={handleReset}>
-        Reset
-      </button>
     </div>
   );
 }

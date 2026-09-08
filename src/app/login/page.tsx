@@ -10,30 +10,10 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   return (
     <div className="tracker-root">
-      <div className="login-shell">
-        <div className="login-brand">
-          <div className="login-logo-row">
-            <Logomark size={36} />
-            <div className="display login-logo">Daily Fuel Log</div>
-          </div>
-          <p className="login-pitch">
-            Log meals in seconds, watch your macros fill in real time, and see
-            exactly how today adds up against your goal.
-          </p>
-          <ul className="login-macro-list" aria-hidden="true">
-            <li>
-              <i className="login-macro-dot" style={{ background: "var(--protein)" }} />
-              Protein
-            </li>
-            <li>
-              <i className="login-macro-dot" style={{ background: "var(--carbs)" }} />
-              Carbs
-            </li>
-            <li>
-              <i className="login-macro-dot" style={{ background: "var(--fat)" }} />
-              Fat
-            </li>
-          </ul>
+      <div className="login-page">
+        <div className="login-logo-row">
+          <Logomark size={30} />
+          <div className="display login-logo">Daily Fuel Log</div>
         </div>
 
         <div className="login-card">
@@ -69,16 +49,30 @@ export default async function LoginPage(props: PageProps<"/login">) {
               Don&rsquo;t have an account? Sign up
             </button>
           </form>
-
-          <p className="disclaimer-footer login-disclaimer">
-            For personal tracking only — not medical or dietary advice. Consult a
-            doctor or registered dietitian before making significant diet changes.
-            <br />
-            <Link href="/about" className="disclaimer-about-link">
-              About this app
-            </Link>
-          </p>
         </div>
+
+        <ul className="login-macro-list" aria-hidden="true">
+          <li>
+            <i className="login-macro-dot" style={{ background: "var(--protein)" }} />
+            Protein
+          </li>
+          <li>
+            <i className="login-macro-dot" style={{ background: "var(--carbs)" }} />
+            Carbs
+          </li>
+          <li>
+            <i className="login-macro-dot" style={{ background: "var(--fat)" }} />
+            Fat
+          </li>
+        </ul>
+
+        <p className="disclaimer-footer login-disclaimer">
+          For personal tracking only — not medical or dietary advice.
+          <br />
+          <Link href="/about" className="disclaimer-about-link">
+            About this app
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -24,12 +24,19 @@ export default function MealSection({
         defaultOpen={items.length > 0}
         headerLeft={
           <>
+            {section.workout && <span className="workout-dot" aria-hidden="true" />}
             <span className="name display">{section.label}</span>
             <span className="time">{section.time}</span>
           </>
         }
         headerRight={
-          totals.cal > 0 ? <span className="mini-total">{Math.round(totals.cal)} cal</span> : null
+          items.length > 0 ? (
+            <span className="mini-total">{Math.round(totals.cal)} cal</span>
+          ) : (
+            <span className="section-empty-hint">
+              No food logged <span className="section-add-hint">+ Add {section.label.toLowerCase()}</span>
+            </span>
+          )
         }
       >
         <div className="items">
