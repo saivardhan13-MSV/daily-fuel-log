@@ -33,19 +33,23 @@ export default function WaterWidget({ date, amountMl }: { date: string; amountMl
   }
 
   return (
-    <div className="water-widget">
+    <div className="water-card">
       <div className="water-head">
         <span className="water-title">Hydration</span>
-        <span className="water-readout">
-          {liters}
-          <span className="water-readout-goal">/{(DAILY_GOAL_ML / 1000).toFixed(1)} L</span>
-        </span>
+        {reachedGoal && <span className="water-goal-hit">Goal reached</span>}
       </div>
 
-      <span className="water-bar">
-        <span className="water-bar-fill" style={{ width: `${pct}%` }} />
-      </span>
-      {reachedGoal && <div className="water-goal-hit">Goal reached</div>}
+      <div className="water-visual">
+        <div className="water-tube">
+          <div className="water-tube-fill" style={{ height: `${pct}%` }}>
+            <span className="water-tube-surface" />
+          </div>
+        </div>
+        <div className="water-readout">
+          <span className="water-readout-val display">{liters}</span>
+          <span className="water-readout-goal">of {(DAILY_GOAL_ML / 1000).toFixed(1)} L</span>
+        </div>
+      </div>
 
       <div className="water-buttons">
         {QUICK_ADD.map((ml) => (
@@ -53,10 +57,10 @@ export default function WaterWidget({ date, amountMl }: { date: string; amountMl
             +{ml >= 1000 ? `${ml / 1000}L` : `${ml}ml`}
           </button>
         ))}
-        <button type="button" className="water-reset" disabled={isPending} onClick={handleReset}>
-          Reset
-        </button>
       </div>
+      <button type="button" className="water-reset" disabled={isPending} onClick={handleReset}>
+        Reset
+      </button>
     </div>
   );
 }

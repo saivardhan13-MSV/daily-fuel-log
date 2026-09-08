@@ -12,10 +12,11 @@ export default function CalorieHero({
 }) {
   if (target == null) {
     return (
-      <div className="calorie-hero calorie-hero-empty">
-        <div className="calorie-hero-empty-title display">Set up your daily target</div>
+      <div className="calorie-hero-card calorie-hero-empty">
+        <div className="calorie-hero-empty-mark" aria-hidden="true" />
+        <div className="calorie-hero-empty-title display">Your day starts here</div>
         <p className="calorie-hero-empty-text">
-          You haven&rsquo;t set your calorie and macro targets yet.
+          Set your calorie and macro targets to personalize your daily log.
         </p>
         <Link href="/targets" className="calorie-hero-cta">
           Set targets
@@ -29,15 +30,12 @@ export default function CalorieHero({
   const pct = Math.min(100, (consumed / target) * 100);
 
   return (
-    <div className="calorie-hero">
-      <div className="calorie-hero-ring">
-        <AnimatedHeroRing value={consumed} pct={pct} />
+    <div className="calorie-hero-card">
+      <div className="calorie-hero-ring-wrap">
+        <AnimatedHeroRing value={Math.abs(remaining)} pct={pct} unit={over ? "over" : "kcal left"} />
       </div>
       <div className="calorie-hero-main">
-        <div className="calorie-hero-number display">
-          {Math.abs(remaining).toLocaleString()}
-        </div>
-        <div className="calorie-hero-label">{over ? "calories over today" : "calories remaining"}</div>
+        <div className="calorie-hero-label">{over ? "Calories over today" : "Calories remaining"}</div>
         <div className="calorie-hero-sub">
           <span>
             <b>{target.toLocaleString()}</b> goal

@@ -84,6 +84,25 @@ export default function Topbar({
           </button>
         </form>
       </div>
+
+      <nav className="bottom-nav" aria-label="Primary">
+        <Link href="/" className={active === "tracker" ? "active" : ""}>
+          <IconToday />
+          <span>Today</span>
+        </Link>
+        <Link href="/history" className={active === "history" ? "active" : ""}>
+          <IconHistory />
+          <span>History</span>
+        </Link>
+        <Link href="/trends" className={active === "trends" ? "active" : ""}>
+          <IconTrends />
+          <span>Trends</span>
+        </Link>
+        <Link href="/targets" className={active === "targets" ? "active" : ""}>
+          <IconTargets />
+          <span>Targets</span>
+        </Link>
+      </nav>
     </div>
   );
 }

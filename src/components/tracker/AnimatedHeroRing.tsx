@@ -74,7 +74,7 @@ export default function AnimatedHeroRing({
         />
       </svg>
       <div className="ring-center">
-        <div className="val display">{shownValue}</div>
+        <div className="val display">{shownValue.toLocaleString()}</div>
         {unit && <div className="ring-unit">{unit}</div>}
       </div>
     </div>

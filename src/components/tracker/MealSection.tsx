@@ -19,7 +19,7 @@ export default function MealSection({
   const totals = totalsForItems(items);
 
   return (
-    <div className={`section${section.workout ? " workout" : ""}`}>
+    <div className={`section${section.workout ? " workout" : ""}${items.length > 0 ? " has-items" : ""}`}>
       <SectionAccordion
         defaultOpen={items.length > 0}
         headerLeft={

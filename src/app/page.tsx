@@ -46,48 +46,63 @@ export default async function Home(props: PageProps<"/">) {
 
   return (
     <div className="tracker-root">
-      <div className="app">
+      <div className="today-shell">
         <DateSync currentDate={date} hasExplicitDate={hasExplicitDate} />
         <Topbar active="tracker" userEmail={user.email} streak={streak} />
 
-        <DateNav date={date} />
+        <div className="reveal reveal-1">
+          <DateNav date={date} />
+        </div>
 
         {proteinGoalMet && (
           <div className="milestone-banner">Protein goal reached for today.</div>
         )}
 
-        <CalorieHero
-          consumed={Math.round(totals.cal)}
-          target={targets?.target_calories}
-          loggedAnything={hasEntries}
-        />
-
-        {targets?.target_calories != null && (
-          <MacroStrip
-            items={[
-              { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
-              { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
-              { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
-            ]}
-          />
-        )}
-
-        <div id="today-log" className="meal-log">
-          {SECTIONS.map((section) => (
-            <MealSection
-              key={section.key}
-              section={section}
-              items={entries[section.key]}
-              date={date}
-              customFoods={customFoods}
+        <div className="today-grid">
+          <div className="area-hero reveal reveal-2">
+            <CalorieHero
+              consumed={Math.round(totals.cal)}
+              target={targets?.target_calories}
+              loggedAnything={hasEntries}
             />
-          ))}
+          </div>
+
+          <div className="area-hydration reveal reveal-3">
+            <WaterWidget date={date} amountMl={waterMl} />
+          </div>
+
+          {targets?.target_calories != null && (
+            <div className="area-macros reveal reveal-3">
+              <MacroStrip
+                items={[
+                  { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
+                  { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
+                  { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
+                ]}
+              />
+            </div>
+          )}
+
+          <div className="area-meals reveal reveal-4">
+            <div className="meal-log-label">Meal log</div>
+            <div id="today-log" className="meal-log">
+              {SECTIONS.map((section) => (
+                <MealSection
+                  key={section.key}
+                  section={section}
+                  items={entries[section.key]}
+                  date={date}
+                  customFoods={customFoods}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="area-actions">
+            <ClearDayButton date={date} />
+            <FooterDisclaimer />
+          </div>
         </div>
-
-        <WaterWidget date={date} amountMl={waterMl} />
-
-        <ClearDayButton date={date} />
-        <FooterDisclaimer />
       </div>
     </div>
   );
