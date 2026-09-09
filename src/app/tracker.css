@@ -1,22 +1,28 @@
 /* Daily Fuel Log tracker — ported from the HTML prototype, same visual design. */
 .tracker-root {
-  --bg: #17171a;
-  --surface: #201e21;
-  --surface-alt: #2a2729;
-  --surface-2: #29262a;
-  --surface-3: #322e33;
-  --line: #3a3733;
-  --line-soft: #38343730;
-  --text: #f2ede2;
-  --text-muted: #9b9488;
-  --text-faint: #716b62;
-  --protein: #e8b94a;
-  --carbs: #4e9e94;
-  --fat: #c5644a;
-  --cal: #f2ede2;
-  --workout: #c9e265;
-  --danger: #c5644a;
-  --accent: #e8b94a;
+  /* Premium light: warm off-white surfaces, near-black text, a deep
+     sage/teal accent carrying the UI, macro hues deepened for contrast
+     on light ground. Amber stays reserved for protein + the calorie
+     hero — it no longer doubles as the app's link/button color. */
+  --bg: #f7f4ee;
+  --surface: #ffffff;
+  --surface-alt: #f2ede2;
+  --surface-2: #fbf8f2;
+  --surface-3: #eae2d1;
+  --line: #e5ddc9;
+  --line-soft: #e5ddc94d;
+  --text: #221e17;
+  --text-muted: #6c6455;
+  --text-faint: #a49b86;
+  --protein: #c98a2b;
+  --carbs: #2f7d70;
+  --fat: #b25a3d;
+  --cal: #221e17;
+  --workout: #5f7d3d;
+  --danger: #b25a3d;
+  --accent: #2c6a5e;
+  --accent-strong: #1f4f46;
+  --accent-soft: #e6efec;
 
   --space-1: 8px;
   --space-2: 12px;
@@ -24,11 +30,11 @@
   --space-4: 24px;
   --space-5: 32px;
 
-  --radius: 14px;
+  --radius: 12px;
   --radius-sm: 8px;
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.55);
-  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.35), 0 28px 56px -20px rgba(0, 0, 0, 0.65);
-  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 45%);
+  --shadow-soft: 0 1px 2px rgba(40, 32, 20, 0.05), 0 10px 24px -14px rgba(40, 32, 20, 0.14);
+  --shadow-elevated: 0 2px 4px rgba(40, 32, 20, 0.05), 0 30px 60px -24px rgba(40, 32, 20, 0.22);
+  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 45%);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   color: var(--text);
@@ -36,8 +42,8 @@
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(232, 185, 74, 0.07), transparent 60%),
-    radial-gradient(ellipse 800px 600px at 100% 10%, rgba(78, 158, 148, 0.05), transparent 55%),
+    radial-gradient(ellipse 1000px 560px at 12% -10%, rgba(201, 138, 43, 0.07), transparent 60%),
+    radial-gradient(ellipse 900px 640px at 100% 0%, rgba(44, 106, 94, 0.06), transparent 55%),
     var(--bg);
   background-color: var(--bg);
 }
@@ -151,10 +157,10 @@
 .tracker-root .today-grid {
   display: grid;
   gap: var(--space-4);
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   grid-template-areas:
     "hero    hydration"
-    "macros  macros"
+    "macros  hydration"
     "meals   meals"
     "actions actions";
   align-items: start;
@@ -162,10 +168,14 @@
 .tracker-root .today-grid > .area-hero {
   grid-area: hero;
 }
+/* No position: sticky here — a sticky grid item's containing block is its
+   own row, and once that row's content is shorter than a sibling row,
+   browsers can let it keep sticking past its row's own boundary and
+   overlap whatever comes next (verified in-browser: it overlapped the
+   meal log while scrolling). Spanning hydration across the hero+macros
+   rows instead gives it real height without needing sticky at all. */
 .tracker-root .today-grid > .area-hydration {
   grid-area: hydration;
-  position: sticky;
-  top: 88px;
 }
 .tracker-root .today-grid > .area-macros {
   grid-area: macros;
@@ -185,9 +195,6 @@
       "meals"
       "hydration"
       "actions";
-  }
-  .tracker-root .today-grid > .area-hydration {
-    position: static;
   }
 }
 
@@ -371,7 +378,7 @@
   display: block;
   font-size: 13px;
   font-weight: 700;
-  color: var(--protein);
+  color: var(--accent);
   margin-bottom: 4px;
 }
 .tracker-root .day-header-row {
@@ -415,13 +422,13 @@
   padding: 0;
 }
 .tracker-root .day-date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.6);
   cursor: pointer;
+  opacity: 0.6;
 }
 .tracker-root .day-jump {
   background: none;
   border: none;
-  color: var(--protein);
+  color: var(--accent);
   padding: 0;
   font-size: 11.5px;
   font-weight: 600;
@@ -503,7 +510,7 @@
   flex-shrink: 0;
   width: 168px;
   height: 168px;
-  filter: drop-shadow(0 0 24px rgba(242, 237, 226, 0.1));
+  filter: drop-shadow(0 0 28px rgba(44, 106, 94, 0.14));
 }
 .tracker-root .calorie-hero-ring-wrap .ring-wrap {
   width: 100%;
@@ -511,12 +518,14 @@
 }
 .tracker-root .calorie-hero-ring-wrap .ring-center .val {
   font-size: 42px;
+  color: var(--cal);
 }
 .tracker-root .calorie-hero-ring-wrap .ring-track {
   stroke: var(--surface-3);
 }
 .tracker-root .calorie-hero-ring-wrap .ring-fill {
-  filter: drop-shadow(0 0 8px rgba(242, 237, 226, 0.5));
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 6px rgba(44, 106, 94, 0.35));
 }
 .tracker-root .calorie-hero-main {
   min-width: 0;
@@ -577,7 +586,7 @@
 .tracker-root .calorie-hero-cta {
   display: inline-block;
   background: var(--accent);
-  color: #241c05;
+  color: #fff;
   font-weight: 700;
   font-size: 13.5px;
   padding: 10px 22px;
@@ -599,10 +608,11 @@
   }
 }
 
-/* ---- Macros: one dimensional nutrition readout, not three cards ---- */
+/* ---- Macros: three compact rings, not a spreadsheet ---- */
 .tracker-root .macro-strip-card {
   display: flex;
-  gap: var(--space-5);
+  justify-content: space-around;
+  gap: var(--space-4);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -610,80 +620,58 @@
   padding: var(--space-4) var(--space-5);
 }
 .tracker-root .macro-strip-item {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 0;
 }
-.tracker-root .macro-strip-top {
+.tracker-root .macro-strip-ring {
+  width: 76px;
+  height: 76px;
+}
+.tracker-root .macro-strip-ring .ring-track {
+  stroke: var(--surface-3);
+}
+.tracker-root .macro-strip-ring .ring-center .val {
+  font-size: 18px;
+}
+.tracker-root .macro-strip-info {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 3px;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
 }
 .tracker-root .macro-strip-label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-muted);
-}
-.tracker-root .macro-strip-pct {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-faint);
-  font-variant-numeric: tabular-nums;
-}
-.tracker-root .macro-strip-value {
-  display: block;
-  font-family: var(--font-display), sans-serif;
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
+  color: var(--text);
 }
 .tracker-root .macro-strip-target {
-  font-family: var(--font-work-sans), sans-serif;
+  font-size: 11px;
   font-weight: 600;
-  font-size: 12px;
   color: var(--text-muted);
-  margin-left: 2px;
+  margin-top: 1px;
 }
-.tracker-root .macro-strip-bar {
-  display: block;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--surface-3);
-  margin-top: 9px;
-  overflow: hidden;
+.tracker-root .macro-strip-item.protein .macro-strip-ring .ring-fill {
+  stroke: var(--protein);
 }
-.tracker-root .macro-strip-bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.5s var(--ease-out);
+.tracker-root .macro-strip-item.carbs .macro-strip-ring .ring-fill {
+  stroke: var(--carbs);
 }
-.tracker-root .macro-strip-item.protein .macro-strip-value {
-  color: var(--protein);
-}
-.tracker-root .macro-strip-item.protein .macro-strip-bar-fill {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--protein) 70%, black), var(--protein));
-}
-.tracker-root .macro-strip-item.carbs .macro-strip-value {
-  color: var(--carbs);
-}
-.tracker-root .macro-strip-item.carbs .macro-strip-bar-fill {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--carbs) 70%, black), var(--carbs));
-}
-.tracker-root .macro-strip-item.fat .macro-strip-value {
-  color: var(--fat);
-}
-.tracker-root .macro-strip-item.fat .macro-strip-bar-fill {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--fat) 70%, black), var(--fat));
+.tracker-root .macro-strip-item.fat .macro-strip-ring .ring-fill {
+  stroke: var(--fat);
 }
 @media (max-width: 560px) {
   .tracker-root .macro-strip-card {
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-3);
   }
-  .tracker-root .macro-strip-value {
-    font-size: 17px;
+  .tracker-root .macro-strip-ring {
+    width: 60px;
+    height: 60px;
+  }
+  .tracker-root .macro-strip-ring .ring-center .val {
+    font-size: 14px;
   }
 }
 
@@ -713,7 +701,7 @@
   border-bottom: none;
 }
 .tracker-root .section.has-items .items {
-  background: var(--surface-2);
+  background: var(--surface-alt);
   border-radius: var(--radius-sm);
   padding: var(--space-2) var(--space-3);
   margin: 2px 0 var(--space-2);
@@ -795,7 +783,7 @@
 .tracker-root .section-add-hint {
   font-style: normal;
   font-weight: 600;
-  color: var(--protein);
+  color: var(--accent);
   margin-left: 4px;
 }
 .tracker-root .chevron {
@@ -1005,16 +993,16 @@
   padding: 4px 0 0;
 }
 .tracker-root .weight-hint a {
-  color: var(--protein);
+  color: var(--accent);
   text-decoration: underline;
   margin-left: 4px;
 }
 /* Primary action button — solid fill, no gradient/glow. Used for the one
    confident action in a given context (add food, sign in, save targets). */
 .tracker-root .add-btn {
-  background: var(--protein);
+  background: var(--accent);
   border: none;
-  color: #241c05;
+  color: #fff;
   font-weight: 700;
   padding: 8px 16px;
   font-size: 13px;
@@ -1022,7 +1010,7 @@
   font-family: inherit;
 }
 .tracker-root .add-btn:hover:not(:disabled) {
-  background: #f0c968;
+  background: var(--accent-strong);
 }
 .tracker-root .add-btn:disabled {
   opacity: 0.5;
@@ -1227,7 +1215,7 @@
   text-decoration: none;
 }
 .tracker-root .cal-day:hover {
-  border-color: var(--protein);
+  border-color: var(--accent);
 }
 .tracker-root .cal-day.empty {
   background: transparent;
@@ -1235,18 +1223,18 @@
   cursor: default;
 }
 .tracker-root .cal-day.has-data {
-  border-color: var(--protein);
+  border-color: var(--accent);
 }
 .tracker-root .cal-day .dnum {
   font-weight: 600;
 }
 .tracker-root .cal-day .dcal {
   font-size: 9px;
-  color: var(--protein);
+  color: var(--accent);
   margin-top: 2px;
 }
 .tracker-root .cal-day.today-cell {
-  outline: 2px solid var(--carbs);
+  outline: 2px solid var(--protein);
   outline-offset: -2px;
 }
 .tracker-root .dbar-track {
@@ -1260,7 +1248,7 @@
 .tracker-root .dbar-fill {
   display: block;
   height: 100%;
-  background: var(--protein);
+  background: var(--accent);
 }
 
 /* ---- Disclaimers ---- */
@@ -1342,7 +1330,7 @@
   background: var(--surface-3);
   border: 1px solid var(--line);
   overflow: hidden;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 2px 6px rgba(40, 32, 20, 0.14);
 }
 .tracker-root .water-tube-fill {
   position: absolute;
@@ -1566,7 +1554,7 @@
 .tracker-root .login-visual-glow {
   position: absolute;
   inset: -30px;
-  background: radial-gradient(circle, rgba(232, 185, 74, 0.16), transparent 70%);
+  background: radial-gradient(circle, rgba(201, 138, 43, 0.14), transparent 70%);
   filter: blur(4px);
 }
 .tracker-root .login-visual-spin {
@@ -1578,7 +1566,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 20px 36px rgba(40, 32, 20, 0.16));
 }
 @keyframes login-mark-spin {
   from {
@@ -1816,7 +1804,7 @@
 .tracker-root .tgt-field input:focus,
 .tracker-root .tgt-field select:focus {
   outline: none;
-  border-color: var(--protein);
+  border-color: var(--accent);
 }
 .tracker-root .tgt-toggle {
   width: fit-content;
