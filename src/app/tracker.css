@@ -1,26 +1,29 @@
 /* Daily Fuel Log tracker — ported from the HTML prototype, same visual design. */
 .tracker-root {
-  /* Back to the dark palette by request — amber is the app's one accent
-     again (--accent = --protein), not split into a separate UI color. */
-  --bg: #17171a;
-  --surface: #201e21;
-  --surface-alt: #2a2729;
-  --surface-2: #29262a;
-  --surface-3: #322e33;
-  --line: #3a3733;
-  --line-soft: #38343730;
-  --text: #f2ede2;
-  --text-muted: #9b9488;
-  --text-faint: #716b62;
-  --protein: #e8b94a;
-  --carbs: #4e9e94;
-  --fat: #c5644a;
-  --cal: #f2ede2;
-  --workout: #c9e265;
-  --danger: #c5644a;
-  --accent: #e8b94a;
-  --accent-strong: #f0c968;
-  --accent-soft: #2a2729;
+  /* Soft-dark graphite: a blue-charcoal ground (not pure black), layered
+     slate/green-gray surfaces, warm off-white text. Sage/teal is the one
+     UI accent for nav/buttons/links; warm amber is kept in reserve for
+     the calorie hero and goal-reached moments — it no longer doubles as
+     the app's everyday action color. */
+  --bg: #12171a;
+  --surface: #1b2224;
+  --surface-alt: #212a2a;
+  --surface-2: #1f2729;
+  --surface-3: #2a3435;
+  --line: #303c3c;
+  --line-soft: #303c3c30;
+  --text: #f1ede4;
+  --text-muted: #8e9c95;
+  --text-faint: #5c6b64;
+  --protein: #e0a94f;
+  --carbs: #5aa89c;
+  --fat: #c17456;
+  --cal: #f1ede4;
+  --workout: #9fc678;
+  --danger: #c17456;
+  --accent: #6fae8e;
+  --accent-strong: #8ec3a5;
+  --accent-soft: #1c2725;
 
   --space-1: 8px;
   --space-2: 12px;
@@ -32,7 +35,7 @@
   --radius-sm: 8px;
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.55);
   --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.35), 0 28px 56px -20px rgba(0, 0, 0, 0.65);
-  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 45%);
+  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 45%);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   color: var(--text);
@@ -40,8 +43,8 @@
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(232, 185, 74, 0.07), transparent 60%),
-    radial-gradient(ellipse 800px 600px at 100% 10%, rgba(78, 158, 148, 0.05), transparent 55%),
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(111, 174, 142, 0.06), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 100% 10%, rgba(224, 169, 79, 0.05), transparent 55%),
     var(--bg);
   background-color: var(--bg);
 }
@@ -506,11 +509,14 @@
 }
 .tracker-root .calorie-hero-ring-wrap {
   flex-shrink: 0;
+  position: relative;
   width: 168px;
   height: 168px;
-  filter: drop-shadow(0 0 28px rgba(232, 185, 74, 0.16));
 }
-.tracker-root .calorie-hero-ring-wrap .ring-wrap {
+.tracker-root .calorie-hero-ring-2d {
+  filter: drop-shadow(0 0 28px rgba(224, 169, 79, 0.16));
+}
+.tracker-root .calorie-hero-ring-2d .ring-wrap {
   width: 100%;
   height: 100%;
 }
@@ -521,9 +527,29 @@
 .tracker-root .calorie-hero-ring-wrap .ring-track {
   stroke: var(--surface-3);
 }
-.tracker-root .calorie-hero-ring-wrap .ring-fill {
-  stroke: var(--accent);
-  filter: drop-shadow(0 0 8px rgba(232, 185, 74, 0.5));
+.tracker-root .calorie-hero-ring-2d .ring-fill {
+  stroke: var(--protein);
+  filter: drop-shadow(0 0 8px rgba(224, 169, 79, 0.5));
+}
+.tracker-root .calorie-hero-ring-3d {
+  width: 190px;
+  height: 190px;
+  margin: -11px;
+}
+.tracker-root .calorie-hero-ring-3d-number {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tracker-root .ring-center-static .val {
+  font-size: 38px;
+}
+@media (max-width: 640px) {
+  .tracker-root .calorie-hero-ring-3d {
+    width: 168px;
+    height: 168px;
+    margin: 0;
+  }
 }
 .tracker-root .calorie-hero-main {
   min-width: 0;
@@ -584,7 +610,7 @@
 .tracker-root .calorie-hero-cta {
   display: inline-block;
   background: var(--accent);
-  color: #241c05;
+  color: #0f1e19;
   font-weight: 700;
   font-size: 13.5px;
   padding: 10px 22px;
@@ -1000,7 +1026,7 @@
 .tracker-root .add-btn {
   background: var(--accent);
   border: none;
-  color: #241c05;
+  color: #0f1e19;
   font-weight: 700;
   padding: 8px 16px;
   font-size: 13px;
@@ -1552,7 +1578,7 @@
 .tracker-root .login-visual-glow {
   position: absolute;
   inset: -30px;
-  background: radial-gradient(circle, rgba(232, 185, 74, 0.16), transparent 70%);
+  background: radial-gradient(circle, rgba(111, 174, 142, 0.18), transparent 70%);
   filter: blur(4px);
 }
 .tracker-root .login-visual-spin {

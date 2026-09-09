@@ -1,14 +1,25 @@
 import Link from "next/link";
-import AnimatedHeroRing from "./AnimatedHeroRing";
+import CalorieHeroVisual from "./CalorieHeroVisual";
+
+export interface MacroProgress {
+  value: number;
+  target: number | null | undefined;
+}
 
 export default function CalorieHero({
   consumed,
   target,
   loggedAnything,
+  protein,
+  carbs,
+  fat,
 }: {
   consumed: number;
   target: number | null | undefined;
   loggedAnything: boolean;
+  protein: MacroProgress;
+  carbs: MacroProgress;
+  fat: MacroProgress;
 }) {
   if (target == null) {
     return (
@@ -28,12 +39,19 @@ export default function CalorieHero({
   const remaining = target - consumed;
   const over = remaining < 0;
   const pct = Math.min(100, (consumed / target) * 100);
+  const macroPct = (m: MacroProgress) =>
+    m.target != null && m.target > 0 ? Math.min(100, (m.value / m.target) * 100) : 0;
 
   return (
     <div className="calorie-hero-card">
-      <div className="calorie-hero-ring-wrap">
-        <AnimatedHeroRing value={Math.abs(remaining)} pct={pct} unit={over ? "over" : "kcal left"} />
-      </div>
+      <CalorieHeroVisual
+        consumed={Math.abs(remaining)}
+        pct={pct}
+        unit={over ? "over" : "kcal left"}
+        proteinPct={macroPct(protein)}
+        carbsPct={macroPct(carbs)}
+        fatPct={macroPct(fat)}
+      />
       <div className="calorie-hero-main">
         <div className="calorie-hero-label">{over ? "Calories over today" : "Calories remaining"}</div>
         <div className="calorie-hero-sub">

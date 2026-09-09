@@ -15,11 +15,13 @@ export default function AnimatedHeroRing({
   pct,
   unit,
   decimals = 0,
+  ringless = false,
 }: {
   value: number;
   pct: number;
   unit?: string;
   decimals?: number;
+  ringless?: boolean;
 }) {
   const reduced = prefersReducedMotion();
   const [displayPct, setDisplayPct] = useState(() => (reduced ? pct : 0));
@@ -60,6 +62,15 @@ export default function AnimatedHeroRing({
   const shownPct = reduced ? pct : displayPct;
   const shownValue = reduced ? value : displayValue;
   const offset = CIRCUMFERENCE * (1 - shownPct / 100);
+
+  if (ringless) {
+    return (
+      <div className="ring-center ring-center-static">
+        <div className="val display">{shownValue.toLocaleString()}</div>
+        {unit && <div className="ring-unit">{unit}</div>}
+      </div>
+    );
+  }
 
   return (
     <div className="ring-wrap">

@@ -17,6 +17,7 @@ import CalorieHero from "@/components/tracker/CalorieHero";
 import MacroStrip from "@/components/tracker/MacroStrip";
 import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
+import DateTransition from "@/components/tracker/DateTransition";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
@@ -58,51 +59,56 @@ export default async function Home(props: PageProps<"/">) {
           <div className="milestone-banner">Protein goal reached for today.</div>
         )}
 
-        <div className="today-grid">
-          <div className="area-hero reveal reveal-2">
-            <CalorieHero
-              consumed={Math.round(totals.cal)}
-              target={targets?.target_calories}
-              loggedAnything={hasEntries}
-            />
-          </div>
-
-          <div className="area-hydration reveal reveal-3">
-            <WaterWidget date={date} amountMl={waterMl} />
-          </div>
-
-          {targets?.target_calories != null && (
-            <div className="area-macros reveal reveal-3">
-              <MacroStrip
-                items={[
-                  { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
-                  { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
-                  { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
-                ]}
+        <DateTransition date={date}>
+          <div className="today-grid">
+            <div className="area-hero reveal reveal-2">
+              <CalorieHero
+                consumed={Math.round(totals.cal)}
+                target={targets?.target_calories}
+                loggedAnything={hasEntries}
+                protein={{ value: round1(totals.protein), target: targets?.target_protein }}
+                carbs={{ value: round1(totals.carbs), target: targets?.target_carbs }}
+                fat={{ value: round1(totals.fat), target: targets?.target_fat }}
               />
             </div>
-          )}
 
-          <div className="area-meals reveal reveal-4">
-            <div className="meal-log-label">Meal log</div>
-            <div id="today-log" className="meal-log">
-              {SECTIONS.map((section) => (
-                <MealSection
-                  key={section.key}
-                  section={section}
-                  items={entries[section.key]}
-                  date={date}
-                  customFoods={customFoods}
+            <div className="area-hydration reveal reveal-3">
+              <WaterWidget date={date} amountMl={waterMl} />
+            </div>
+
+            {targets?.target_calories != null && (
+              <div className="area-macros reveal reveal-3">
+                <MacroStrip
+                  items={[
+                    { cls: "protein", label: "Protein", value: round1(totals.protein), target: targets.target_protein },
+                    { cls: "carbs", label: "Carbs", value: round1(totals.carbs), target: targets.target_carbs },
+                    { cls: "fat", label: "Fat", value: round1(totals.fat), target: targets.target_fat },
+                  ]}
                 />
-              ))}
+              </div>
+            )}
+
+            <div className="area-meals reveal reveal-4">
+              <div className="meal-log-label">Meal log</div>
+              <div id="today-log" className="meal-log">
+                {SECTIONS.map((section) => (
+                  <MealSection
+                    key={section.key}
+                    section={section}
+                    items={entries[section.key]}
+                    date={date}
+                    customFoods={customFoods}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="area-actions">
+              <ClearDayButton date={date} />
+              <FooterDisclaimer />
             </div>
           </div>
-
-          <div className="area-actions">
-            <ClearDayButton date={date} />
-            <FooterDisclaimer />
-          </div>
-        </div>
+        </DateTransition>
       </div>
     </div>
   );
