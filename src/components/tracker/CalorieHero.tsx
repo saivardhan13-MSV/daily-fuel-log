@@ -1,25 +1,14 @@
 import Link from "next/link";
 import CalorieHeroVisual from "./CalorieHeroVisual";
 
-export interface MacroProgress {
-  value: number;
-  target: number | null | undefined;
-}
-
 export default function CalorieHero({
   consumed,
   target,
   loggedAnything,
-  protein,
-  carbs,
-  fat,
 }: {
   consumed: number;
   target: number | null | undefined;
   loggedAnything: boolean;
-  protein: MacroProgress;
-  carbs: MacroProgress;
-  fat: MacroProgress;
 }) {
   if (target == null) {
     return (
@@ -39,32 +28,20 @@ export default function CalorieHero({
   const remaining = target - consumed;
   const over = remaining < 0;
   const pct = Math.min(100, (consumed / target) * 100);
-  const macroPct = (m: MacroProgress) =>
-    m.target != null && m.target > 0 ? Math.min(100, (m.value / m.target) * 100) : 0;
 
   return (
     <div className="calorie-hero-card">
-      <CalorieHeroVisual
-        consumed={Math.abs(remaining)}
-        pct={pct}
-        unit={over ? "over" : "kcal left"}
-        proteinPct={macroPct(protein)}
-        carbsPct={macroPct(carbs)}
-        fatPct={macroPct(fat)}
-      />
+      <CalorieHeroVisual consumed={Math.abs(remaining)} pct={pct} unit={over ? "over" : "kcal left"} />
       <div className="calorie-hero-main">
         <div className="calorie-hero-label">{over ? "Calories over today" : "Calories remaining"}</div>
         <div className="calorie-hero-sub">
-          <span>
-            <b>{target.toLocaleString()}</b> goal
-          </span>
-          <span>
-            <b>{consumed.toLocaleString()}</b> consumed
-          </span>
+          <b>{target.toLocaleString()}</b> goal&nbsp;·&nbsp;<b>{consumed.toLocaleString()}</b> consumed
         </div>
         {!loggedAnything && (
           <p className="calorie-hero-nudge">
-            Nothing logged yet. <a href="#today-log">Add your first meal below.</a>
+            Nothing logged yet.
+            <br />
+            <a href="#today-log">Add your first meal</a>
           </p>
         )}
       </div>

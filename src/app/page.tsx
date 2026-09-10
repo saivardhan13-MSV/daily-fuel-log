@@ -66,9 +66,6 @@ export default async function Home(props: PageProps<"/">) {
                 consumed={Math.round(totals.cal)}
                 target={targets?.target_calories}
                 loggedAnything={hasEntries}
-                protein={{ value: round1(totals.protein), target: targets?.target_protein }}
-                carbs={{ value: round1(totals.carbs), target: targets?.target_carbs }}
-                fat={{ value: round1(totals.fat), target: targets?.target_fat }}
               />
             </div>
 

@@ -5,22 +5,27 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { animate } from "motion";
 
-const SEGMENTS_RADIAL = 10;
-const SEGMENTS_TUBULAR = 56;
+const SEGMENTS_RADIAL = 12;
+const SEGMENTS_TUBULAR = 64;
 const TWO_PI = Math.PI * 2;
 
 function ringGeometry(radius: number, tube: number, arc: number) {
   return new THREE.TorusGeometry(radius, tube, SEGMENTS_RADIAL, SEGMENTS_TUBULAR, Math.max(0.001, arc));
 }
 
-interface RingSpec {
+function ProgressRing({
+  pct,
+  color,
+  radius,
+  tube,
+  trackOpacity = 0.35,
+}: {
   pct: number;
   color: string;
   radius: number;
   tube: number;
-}
-
-function ProgressRing({ pct, color, radius, tube }: RingSpec) {
+  trackOpacity?: number;
+}) {
   const fillRef = useRef<THREE.Mesh>(null);
   const current = useRef(0);
   const { invalidate } = useThree();
@@ -28,8 +33,8 @@ function ProgressRing({ pct, color, radius, tube }: RingSpec) {
   useEffect(() => {
     const controls = animate(current.current, pct, {
       type: "spring",
-      stiffness: 85,
-      damping: 20,
+      stiffness: 80,
+      damping: 22,
       onUpdate: (v) => {
         current.current = v;
         const mesh = fillRef.current;
@@ -46,27 +51,46 @@ function ProgressRing({ pct, color, radius, tube }: RingSpec) {
 
   return (
     <>
-      <mesh rotation={[0, 0, 0]}>
+      <mesh>
         <torusGeometry args={[radius, tube, SEGMENTS_RADIAL, SEGMENTS_TUBULAR]} />
-        <meshStandardMaterial color="#3a453f" roughness={0.75} metalness={0.05} transparent opacity={0.45} />
+        <meshStandardMaterial color="#4a5754" roughness={0.85} metalness={0} transparent opacity={trackOpacity} />
       </mesh>
       <mesh ref={fillRef} rotation={[0, 0, Math.PI / 2]}>
         <torusGeometry args={[radius, tube, SEGMENTS_RADIAL, SEGMENTS_TUBULAR, 0.001]} />
-        <meshStandardMaterial color={color} roughness={0.32} metalness={0.18} />
+        <meshStandardMaterial color={color} roughness={0.4} metalness={0.08} />
       </mesh>
     </>
   );
 }
 
+// A quiet, fixed ring purely for dimensional layering — not a second data
+// series. Sits inside the calorie ring, thin and low-opacity, in the
+// accent color so it reads as a deliberate frame, not a competing metric.
+function AccentRing({ radius, tube, color }: { radius: number; tube: number; color: string }) {
+  return (
+    <mesh>
+      <torusGeometry args={[radius, tube, SEGMENTS_RADIAL, SEGMENTS_TUBULAR]} />
+      <meshStandardMaterial color={color} roughness={0.55} metalness={0.1} transparent opacity={0.55} />
+    </mesh>
+  );
+}
+
+// A soft, barely-there disc behind the number — the "center surface" it
+// sits on, not another progress indicator.
+function CenterSurface({ radius, color }: { radius: number; color: string }) {
+  return (
+    <mesh position={[0, 0, -0.05]}>
+      <circleGeometry args={[radius, 48]} />
+      <meshStandardMaterial color={color} roughness={0.9} metalness={0} transparent opacity={0.5} />
+    </mesh>
+  );
+}
+
 export interface HeroRingData {
   calPct: number;
-  proteinPct: number;
-  carbsPct: number;
-  fatPct: number;
   calColor: string;
-  proteinColor: string;
-  carbsColor: string;
-  fatColor: string;
+  accentColor: string;
+  surfaceColor: string;
 }
 
 function Scene({ data }: { data: HeroRingData }) {
@@ -80,7 +104,7 @@ function Scene({ data }: { data: HeroRingData }) {
       const rect = el.getBoundingClientRect();
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-      target.current = { x: ny * 0.1, y: nx * 0.14 };
+      target.current = { x: ny * 0.08, y: nx * 0.11 };
       invalidate();
     }
     function onLeave() {
@@ -106,11 +130,10 @@ function Scene({ data }: { data: HeroRingData }) {
   });
 
   return (
-    <group ref={groupRef} rotation={[Math.PI / 2.35, 0, 0]}>
-      <ProgressRing pct={data.calPct} color={data.calColor} radius={1.42} tube={0.155} />
-      <ProgressRing pct={data.proteinPct} color={data.proteinColor} radius={1.04} tube={0.085} />
-      <ProgressRing pct={data.carbsPct} color={data.carbsColor} radius={0.8} tube={0.085} />
-      <ProgressRing pct={data.fatPct} color={data.fatColor} radius={0.56} tube={0.085} />
+    <group ref={groupRef} rotation={[Math.PI / 2.3, 0, 0]}>
+      <CenterSurface radius={0.64} color={data.surfaceColor} />
+      <AccentRing radius={0.86} tube={0.025} color={data.accentColor} />
+      <ProgressRing pct={data.calPct} color={data.calColor} radius={1.32} tube={0.105} trackOpacity={0.32} />
     </group>
   );
 }
@@ -121,13 +144,13 @@ export default function CalorieHero3D(data: HeroRingData) {
     <Canvas
       frameloop="demand"
       dpr={dpr}
-      camera={{ position: [0, 3.4, 3.7], fov: 30 }}
+      camera={{ position: [0, 3.6, 3.9], fov: 28 }}
       gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
       style={{ width: "100%", height: "100%" }}
     >
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[3, 4.5, 5]} intensity={1.15} />
-      <directionalLight position={[-3, -1.5, -2]} intensity={0.22} />
+      <ambientLight intensity={0.68} />
+      <directionalLight position={[2.5, 4, 4.5]} intensity={0.85} />
+      <directionalLight position={[-2.5, 1, -1.5]} intensity={0.35} />
       <Scene data={data} />
     </Canvas>
   );

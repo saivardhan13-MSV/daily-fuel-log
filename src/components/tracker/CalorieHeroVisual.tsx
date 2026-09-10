@@ -37,19 +37,9 @@ export interface CalorieHeroVisualProps {
   consumed: number;
   pct: number;
   unit?: string;
-  proteinPct: number;
-  carbsPct: number;
-  fatPct: number;
 }
 
-export default function CalorieHeroVisual({
-  consumed,
-  pct,
-  unit,
-  proteinPct,
-  carbsPct,
-  fatPct,
-}: CalorieHeroVisualProps) {
+export default function CalorieHeroVisual({ consumed, pct, unit }: CalorieHeroVisualProps) {
   const use3D = useSyncExternalStore(noopSubscribe, getSnapshot, getServerSnapshot);
 
   if (!use3D) {
@@ -62,13 +52,9 @@ export default function CalorieHeroVisual({
 
   const data: HeroRingData = {
     calPct: pct,
-    proteinPct,
-    carbsPct,
-    fatPct,
     calColor: "#e0a94f",
-    proteinColor: "#e0a94f",
-    carbsColor: "#5aa89c",
-    fatColor: "#c17456",
+    accentColor: "#6fae8e",
+    surfaceColor: "#1f2729",
   };
 
   return (

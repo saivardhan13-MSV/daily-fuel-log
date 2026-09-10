@@ -15,13 +15,14 @@ export default function MacroStrip({ items }: { items: MacroStripItem[] }) {
         const pct = hasTarget ? Math.min(100, (item.value / item.target!) * 100) : 0;
         return (
           <div className={`macro-strip-item ${item.cls}`} key={item.cls}>
+            <span className="macro-strip-label">{item.label}</span>
             <div className="macro-strip-ring">
-              <AnimatedHeroRing value={item.value} pct={pct} decimals={1} />
+              <AnimatedHeroRing value={pct} pct={pct} unit="%" decimals={0} />
             </div>
-            <div className="macro-strip-info">
-              <span className="macro-strip-label">{item.label}</span>
-              <span className="macro-strip-target">{hasTarget ? `of ${item.target}g` : "g"}</span>
-            </div>
+            <span className="macro-strip-value">
+              {Math.round(item.value)}
+              {hasTarget ? `/${item.target}g` : "g"}
+            </span>
           </div>
         );
       })}
