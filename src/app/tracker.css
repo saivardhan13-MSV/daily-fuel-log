@@ -1418,7 +1418,11 @@
   position: relative;
   flex-shrink: 0;
   width: 54px;
-  height: min(160px, 100%);
+  /* Fixed, not percentage-of-parent: .water-visual's height depends on
+     .water-card's height, which itself depends on content in some grid/
+     flex contexts (mobile stacked layout, narrow viewports) — a percentage
+     here can resolve against an indefinite ancestor and collapse to ~0. */
+  height: 148px;
   border-radius: 27px;
   background: var(--surface-3);
   border: 1px solid var(--line);
