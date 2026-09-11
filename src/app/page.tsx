@@ -20,6 +20,7 @@ import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
 import DateTransition from "@/components/tracker/DateTransition";
 import QuickAddLauncher from "@/components/tracker/QuickAddLauncher";
+import CopyPreviousDay from "@/components/tracker/CopyPreviousDay";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
@@ -45,6 +46,7 @@ export default async function Home(props: PageProps<"/">) {
 
   const totals = totalsForEntries(entries);
   const hasEntries = Object.values(entries).some((items) => items.length > 0);
+  const entryCount = Object.values(entries).reduce((sum, items) => sum + items.length, 0);
   const proteinGoalMet =
     targets?.target_protein != null && totals.protein >= targets.target_protein;
 
@@ -56,6 +58,9 @@ export default async function Home(props: PageProps<"/">) {
 
         <div className="reveal reveal-1">
           <DateNav date={date} />
+          <div className="day-copy-row">
+            <CopyPreviousDay date={date} destinationCount={entryCount} />
+          </div>
         </div>
 
         {proteinGoalMet && (

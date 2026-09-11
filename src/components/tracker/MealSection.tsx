@@ -3,6 +3,7 @@ import { round1, totalsForItems, type EntryItem } from "@/lib/nutrition";
 import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
 import ItemsList from "./ItemsList";
 import AddItemRow from "./AddItemRow";
+import CopyPreviousMeal from "./CopyPreviousMeal";
 import SectionAccordion from "./SectionAccordion";
 
 export default function MealSection({
@@ -44,6 +45,12 @@ export default function MealSection({
         <div className="items">
           <ItemsList items={items} />
           <AddItemRow section={section.key} date={date} customFoods={customFoods} quickAdd={quickAdd} />
+          <CopyPreviousMeal
+            section={section.key}
+            sectionLabel={section.label}
+            date={date}
+            destinationCount={items.length}
+          />
         </div>
         <div className="section-total">
           <span className="p">

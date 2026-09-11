@@ -2195,3 +2195,132 @@
     transition: none;
   }
 }
+
+/* ---- Copy previous meal/day: quiet secondary actions that open the same
+   sheet chrome as the Log Food launcher (.quickadd-backdrop/.quickadd-sheet
+   above), with their own compact preview content only. ---- */
+.tracker-root .copy-trigger {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 0;
+  margin-top: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+.tracker-root .copy-trigger:hover {
+  color: var(--accent);
+}
+.tracker-root .day-copy-row {
+  text-align: center;
+  margin-top: 4px;
+}
+.tracker-root .day-copy-trigger {
+  margin-top: 0;
+}
+
+.tracker-root .copy-status {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: var(--space-2) 0;
+}
+.tracker-root .copy-error {
+  color: var(--danger);
+}
+.tracker-root .copy-source {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: var(--space-2);
+}
+.tracker-root .copy-item-list {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+}
+.tracker-root .copy-item-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.tracker-root .copy-item-list li:last-child {
+  border-bottom: none;
+}
+.tracker-root .copy-item-name {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.tracker-root .copy-item-qty {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .copy-totals {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+.tracker-root .copy-warning {
+  font-size: 12px;
+  color: var(--protein);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: var(--space-3);
+  line-height: 1.4;
+}
+.tracker-root .copy-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.tracker-root .copy-cancel {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tracker-root .copy-cancel:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.tracker-root .copy-date-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+}
+.tracker-root .copy-day-groups {
+  margin-bottom: var(--space-2);
+}
+.tracker-root .copy-day-group {
+  margin-bottom: var(--space-2);
+}
+.tracker-root .copy-day-group-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}

@@ -195,6 +195,62 @@ function formatDate(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// The single most recent date strictly before `beforeDate` that has at
+// least one logged entry (optionally scoped to one section). Used to find
+// what "copy previous" should default to, without scanning the user's full
+// history — one indexed lookup, not a table scan.
+export async function getNearestPriorLoggedDate(
+  supabase: SupabaseClient,
+  userId: string,
+  beforeDate: string,
+  section?: SectionKey,
+): Promise<string | null> {
+  let query = supabase
+    .from("daily_entries")
+    .select("entry_date")
+    .eq("user_id", userId)
+    .lt("entry_date", beforeDate)
+    .order("entry_date", { ascending: false })
+    .limit(1);
+  if (section) query = query.eq("section", section);
+
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data ? (data.entry_date as string) : null;
+}
+
+// Distinct prior logged dates, most recent first — for the "copy a
+// different day" picker. Pulls a bounded window of raw rows (same pattern
+// as getRecentDailyTotals/getStreak) and de-duplicates in JS rather than
+// relying on a SQL DISTINCT the Supabase client doesn't expose directly.
+export async function getRecentLoggedDates(
+  supabase: SupabaseClient,
+  userId: string,
+  beforeDate: string,
+  limit: number,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("daily_entries")
+    .select("entry_date")
+    .eq("user_id", userId)
+    .lt("entry_date", beforeDate)
+    .order("entry_date", { ascending: false })
+    .limit(200);
+
+  if (error) throw error;
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const row of data ?? []) {
+    const d = row.entry_date as string;
+    if (seen.has(d)) continue;
+    seen.add(d);
+    out.push(d);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 // Consecutive days (ending today or yesterday) with at least one logged
 // entry. A day with nothing logged yet doesn't break an in-progress streak
 // until it actually passes.
