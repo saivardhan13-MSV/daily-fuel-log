@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FOOD_DB, PIECE_WEIGHTS, DENSITIES, type SectionKey } from "@/lib/food-db";
 import { capitalize, safeNum } from "@/lib/nutrition";
 import { addEntry, upsertCustomFood } from "@/app/actions/entries";
-import type { CustomFoodRow } from "@/lib/db";
+import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
 import type { SearchResult } from "@/app/api/food-search/route";
 
 interface Suggestion {
@@ -49,6 +49,13 @@ function buildAllFoods(customFoods: CustomFoodRow[]): Map<string, Suggestion> {
   return map;
 }
 
+// qty_label carries the full sentence for pc/ml entries (e.g. "2 pc -> 236g
+// used"); a quick-add chip only has room for the quantity itself.
+function shortQtyLabel(qtyLabel: string): string {
+  const arrowIdx = qtyLabel.indexOf("→");
+  return arrowIdx === -1 ? qtyLabel : qtyLabel.slice(0, arrowIdx).trim();
+}
+
 function searchFoods(query: string, allFoods: Map<string, Suggestion>): Suggestion[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
@@ -64,10 +71,12 @@ export default function AddItemRow({
   section,
   date,
   customFoods,
+  quickAdd,
 }: {
   section: SectionKey;
   date: string;
   customFoods: CustomFoodRow[];
+  quickAdd: QuickAddSuggestion[];
 }) {
   const allFoods = buildAllFoods(customFoods);
 
@@ -83,6 +92,11 @@ export default function AddItemRow({
   const [error, setError] = useState<string | null>(null);
   const [onlineResults, setOnlineResults] = useState<Suggestion[]>([]);
   const [searchingOnline, setSearchingOnline] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [addingChip, setAddingChip] = useState<string | null>(null);
+  const [justAddedChip, setJustAddedChip] = useState<string | null>(null);
+
+  const showQuickAdd = focused && query.trim().length === 0 && quickAdd.length > 0;
 
   const localMatches = searchFoods(query, allFoods);
   const seenNames = new Set(localMatches.map((i) => i.name.toLowerCase()));
@@ -242,6 +256,35 @@ export default function AddItemRow({
     resetForm();
   }
 
+  async function handleQuickAdd(item: QuickAddSuggestion) {
+    if (addingChip) return;
+    setAddingChip(item.foodName);
+    setError(null);
+
+    const result = await addEntry({
+      date,
+      section,
+      foodName: item.foodName,
+      qty: item.qty,
+      qtyLabel: item.qtyLabel,
+      unit: item.unit,
+      carbs: item.carbs,
+      protein: item.protein,
+      fat: item.fat,
+      calories: item.calories,
+    });
+    setAddingChip(null);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setJustAddedChip(item.foodName);
+    setTimeout(() => {
+      setJustAddedChip((cur) => (cur === item.foodName ? null : cur));
+    }, 900);
+  }
+
   async function handleAddCustom() {
     const name = query.trim();
     if (!name) return;
@@ -291,8 +334,16 @@ export default function AddItemRow({
             placeholder="Search any food…"
             value={query}
             onChange={(e) => onInput(e.target.value)}
-            onFocus={() => setShowSuggestions(query.trim().length >= 2)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onFocus={() => {
+              setFocused(true);
+              setShowSuggestions(query.trim().length >= 2);
+            }}
+            onBlur={() =>
+              setTimeout(() => {
+                setFocused(false);
+                setShowSuggestions(false);
+              }, 150)
+            }
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -301,6 +352,27 @@ export default function AddItemRow({
               }
             }}
           />
+          {showQuickAdd && (
+            <div className="quickadd-row">
+              <span className="quickadd-label">Recent</span>
+              <div className="quickadd-chips">
+                {quickAdd.map((item) => (
+                  <button
+                    key={item.foodName}
+                    type="button"
+                    className={`quickadd-chip${justAddedChip === item.foodName ? " added" : ""}`}
+                    disabled={addingChip === item.foodName}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleQuickAdd(item)}
+                  >
+                    <span className="qc-name">{item.foodName}</span>
+                    <span className="qc-dot">·</span>
+                    <span className="qc-qty">{shortQtyLabel(item.qtyLabel)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {showSuggestions && (suggestions.length > 0 || (showOnline && searchingOnline)) && (
             <div className="suggest-box show">
               {suggestions.map((item, idx) => (

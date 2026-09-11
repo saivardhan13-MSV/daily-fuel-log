@@ -1,6 +1,6 @@
 import type { SectionConfig } from "@/lib/food-db";
 import { round1, totalsForItems, type EntryItem } from "@/lib/nutrition";
-import type { CustomFoodRow } from "@/lib/db";
+import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
 import ItemsList from "./ItemsList";
 import AddItemRow from "./AddItemRow";
 import SectionAccordion from "./SectionAccordion";
@@ -10,11 +10,13 @@ export default function MealSection({
   items,
   date,
   customFoods,
+  quickAdd,
 }: {
   section: SectionConfig;
   items: EntryItem[];
   date: string;
   customFoods: CustomFoodRow[];
+  quickAdd: QuickAddSuggestion[];
 }) {
   const totals = totalsForItems(items);
 
@@ -41,7 +43,7 @@ export default function MealSection({
       >
         <div className="items">
           <ItemsList items={items} />
-          <AddItemRow section={section.key} date={date} customFoods={customFoods} />
+          <AddItemRow section={section.key} date={date} customFoods={customFoods} quickAdd={quickAdd} />
         </div>
         <div className="section-total">
           <span className="p">

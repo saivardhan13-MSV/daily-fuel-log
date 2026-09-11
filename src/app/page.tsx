@@ -6,6 +6,7 @@ import {
   getBodyTargets,
   getWaterIntake,
   getStreak,
+  getQuickAddSuggestions,
 } from "@/lib/db";
 import { totalsForEntries, round1, todayStr } from "@/lib/nutrition";
 import { SECTIONS } from "@/lib/food-db";
@@ -32,12 +33,13 @@ export default async function Home(props: PageProps<"/">) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [entries, customFoods, targets, waterMl, streak] = await Promise.all([
+  const [entries, customFoods, targets, waterMl, streak, quickAdd] = await Promise.all([
     getEntriesForDate(supabase, user.id, date),
     getCustomFoods(supabase, user.id),
     getBodyTargets(supabase, user.id),
     getWaterIntake(supabase, user.id, date),
     getStreak(supabase, user.id),
+    getQuickAddSuggestions(supabase, user.id),
   ]);
 
   const totals = totalsForEntries(entries);
@@ -95,6 +97,7 @@ export default async function Home(props: PageProps<"/">) {
                     items={entries[section.key]}
                     date={date}
                     customFoods={customFoods}
+                    quickAdd={quickAdd[section.key]}
                   />
                 ))}
               </div>

@@ -99,6 +99,95 @@ export async function getCustomFoods(
   return data ?? [];
 }
 
+export interface QuickAddSuggestion {
+  foodName: string;
+  qty: number;
+  qtyLabel: string;
+  unit: "g" | "pc" | "ml";
+  carbs: number;
+  protein: number;
+  fat: number;
+  calories: number;
+}
+
+// Recent + frequent foods, one bounded query reused across every meal
+// section (not fetched per-section) so opening the Today page never issues
+// more than one extra request for this. Ranked per section by a simple
+// recency-weighted frequency score: count / (1 + daysSinceLastLogged / 7).
+// That favors foods logged often *and* recently, while a single very recent
+// food still surfaces and stale ones decay out on their own — no separate
+// "recent" vs "frequent" list to reconcile.
+export async function getQuickAddSuggestions(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Record<SectionKey, QuickAddSuggestion[]>> {
+  const { data, error } = await supabase
+    .from("daily_entries")
+    .select("section, food_name, qty, qty_label, unit, carbs, protein, fat, calories, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) throw error;
+
+  interface Group {
+    section: SectionKey;
+    key: string;
+    count: number;
+    lastCreatedAt: string;
+    latest: QuickAddSuggestion;
+  }
+  const groups = new Map<string, Group>();
+
+  for (const row of data ?? []) {
+    const section = row.section as SectionKey;
+    const key = `${section}::${(row.food_name as string).toLowerCase()}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.count += 1;
+      // Rows arrive newest-first, so the first one seen per key is already
+      // the most recent — nothing to update on `latest` for later matches.
+      continue;
+    }
+    groups.set(key, {
+      section,
+      key,
+      count: 1,
+      lastCreatedAt: row.created_at as string,
+      latest: {
+        foodName: row.food_name as string,
+        qty: Number(row.qty),
+        qtyLabel: row.qty_label as string,
+        unit: row.unit as "g" | "pc" | "ml",
+        carbs: Number(row.carbs),
+        protein: Number(row.protein),
+        fat: Number(row.fat),
+        calories: Number(row.calories),
+      },
+    });
+  }
+
+  const now = Date.now();
+  const bySection: Record<SectionKey, Group[]> = {} as Record<SectionKey, Group[]>;
+  for (const s of SECTIONS) bySection[s.key] = [];
+  for (const g of groups.values()) bySection[g.section].push(g);
+
+  const out = {} as Record<SectionKey, QuickAddSuggestion[]>;
+  for (const s of SECTIONS) {
+    const ranked = bySection[s.key]
+      .map((g) => {
+        const daysAgo = (now - new Date(g.lastCreatedAt).getTime()) / 86_400_000;
+        const score = g.count / (1 + daysAgo / 7);
+        return { g, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4)
+      .map(({ g }) => g.latest);
+    out[s.key] = ranked;
+  }
+  return out;
+}
+
 function pad(n: number): string {
   return n < 10 ? "0" + n : "" + n;
 }

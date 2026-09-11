@@ -1100,6 +1100,85 @@
   padding: 0 0 8px;
 }
 
+/* ---- Quick-add: recent/frequent foods for this section, shown only while
+   the search field is focused and empty. Absolutely positioned like the
+   suggest box below so it never shifts surrounding layout, and naturally
+   mutually exclusive with it (one needs an empty query, the other needs
+   2+ chars). ---- */
+.tracker-root .quickadd-row {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--surface-alt);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+}
+.tracker-root .quickadd-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.tracker-root .quickadd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tracker-root .quickadd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  max-width: 100%;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.tracker-root .quickadd-chip:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.tracker-root .quickadd-chip:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.tracker-root .quickadd-chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.tracker-root .quickadd-chip.added {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.tracker-root .quickadd-chip .qc-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+.tracker-root .quickadd-chip .qc-dot {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+.tracker-root .quickadd-chip .qc-qty {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .tracker-root .quickadd-chip .qc-name {
+    max-width: 100px;
+  }
+}
+
 .tracker-root .suggest-box {
   position: absolute;
   top: calc(100% + 2px);
