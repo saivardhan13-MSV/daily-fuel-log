@@ -314,3 +314,35 @@ export const SECTIONS: SectionConfig[] = [
   { key: "postWorkout", label: "Post-Workout", time: "within ~45 min after training", workout: true },
   { key: "dinner", label: "Dinner", time: "~8:00 – 9:00 PM", workout: false },
 ];
+
+// Parses a section's display time (e.g. "~7:00 – 9:00 AM") into a 24h start
+// hour (7). Returns null for strings with no parseable clock time — the two
+// workout sections describe a time relative to training, not a time of day,
+// and are deliberately left out of auto-inference rather than hardcoded.
+function parseStartHour(time: string): number | null {
+  const ampm = time.match(/am|pm/i);
+  const clock = time.match(/(\d{1,2}):(\d{2})/);
+  if (!ampm || !clock) return null;
+  let hour = parseInt(clock[1], 10);
+  const minute = parseInt(clock[2], 10);
+  const isPM = ampm[0].toLowerCase() === "pm";
+  if (isPM && hour !== 12) hour += 12;
+  if (!isPM && hour === 12) hour = 0;
+  return hour + minute / 60;
+}
+
+// Picks the section whose window we're currently in (or most recently
+// passed), using the user's local time. Falls back to the earliest
+// clock-anchored section (breakfast) before that window starts.
+export function inferSectionForTime(now: Date = new Date()): SectionKey {
+  const nowHour = now.getHours() + now.getMinutes() / 60;
+  const candidates = SECTIONS.map((s) => ({ key: s.key, hour: parseStartHour(s.time) }))
+    .filter((c): c is { key: SectionKey; hour: number } => c.hour !== null)
+    .sort((a, b) => a.hour - b.hour);
+  if (candidates.length === 0) return SECTIONS[0].key;
+  let selected = candidates[0].key;
+  for (const c of candidates) {
+    if (c.hour <= nowHour) selected = c.key;
+  }
+  return selected;
+}

@@ -19,6 +19,7 @@ import MacroStrip from "@/components/tracker/MacroStrip";
 import WaterWidget from "@/components/tracker/WaterWidget";
 import DateSync from "@/components/tracker/DateSync";
 import DateTransition from "@/components/tracker/DateTransition";
+import QuickAddLauncher from "@/components/tracker/QuickAddLauncher";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
 import "./tracker.css";
 
@@ -110,6 +111,8 @@ export default async function Home(props: PageProps<"/">) {
           </div>
         </DateTransition>
       </div>
+
+      <QuickAddLauncher date={date} customFoods={customFoods} quickAdd={quickAdd} />
     </div>
   );
 }
