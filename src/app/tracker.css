@@ -2324,3 +2324,232 @@
   letter-spacing: 0.4px;
   margin-bottom: 2px;
 }
+
+/* ---- Trends (History/Trends v1): reuses .targets-hero and .trend-stats
+   from the pre-existing /trends page verbatim; everything below is new to
+   this rebuild — the panel shell, calorie chart, protein columns and the
+   logging-consistency day row. ---- */
+.tracker-root .trend-range-toggle {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: var(--space-4);
+}
+.tracker-root .trend-range-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.tracker-root .trend-range-btn:hover {
+  color: var(--text);
+}
+.tracker-root .trend-range-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.tracker-root .trend-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-4);
+}
+.tracker-root .trend-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.tracker-root .trend-panel-title {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  color: var(--text);
+}
+.tracker-root .trend-panel-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.tracker-root .trend-chart {
+  margin: 0 -4px;
+}
+.tracker-root .trend-insight {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: var(--space-3) 0 0;
+  line-height: 1.5;
+}
+.tracker-root .trend-empty-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+.tracker-root .trend-note-small {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: var(--space-2);
+}
+
+.tracker-root .trend-details {
+  margin-top: var(--space-3);
+}
+.tracker-root .trend-details summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: fit-content;
+}
+.tracker-root .trend-details summary:hover {
+  color: var(--accent);
+}
+.tracker-root .trend-data-list {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.tracker-root .trend-data-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.tracker-root .trend-data-list li:last-child {
+  border-bottom: none;
+}
+
+/* Custom recharts tooltip content — styled to match .quickadd-sheet's
+   surface language rather than recharts' own default box. */
+.tracker-root .trend-tooltip {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-elevated);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+.tracker-root .trend-tooltip-date {
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.tracker-root .trend-tooltip-val {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .trend-tooltip-target {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .trend-tooltip-status {
+  margin-top: 3px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.tracker-root .trend-tooltip-status.status-on-target {
+  color: var(--accent-strong);
+}
+.tracker-root .trend-tooltip-status.status-over-target {
+  color: var(--fat);
+}
+.tracker-root .trend-tooltip-status.status-under-target {
+  color: var(--text-muted);
+}
+
+/* Protein consistency: a compact column-per-day sparkline, not a second
+   line chart — deliberately distinct from the calorie panel above. */
+.tracker-root .trend-protein-row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100px;
+  padding-top: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.tracker-root .trend-protein-col {
+  flex: 1;
+  min-width: 4px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.tracker-root .trend-protein-bar {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  background: var(--protein);
+  border-radius: 2px 2px 0 0;
+  opacity: 0.65;
+  transition: height 0.22s var(--ease-out);
+}
+.tracker-root .trend-protein-bar.hit {
+  opacity: 1;
+}
+.tracker-root .trend-protein-target-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--text-faint);
+  z-index: 1;
+}
+
+/* Logging consistency: a simple filled/empty day row — not a GitHub-style
+   heatmap. Shape (filled square vs. outlined square), not color alone,
+   carries the logged/not-logged distinction. */
+.tracker-root .trend-day-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tracker-root .trend-day-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: transparent;
+  border: 1.5px solid var(--line);
+  flex-shrink: 0;
+}
+.tracker-root .trend-day-cell.logged {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (max-width: 480px) {
+  .tracker-root .trend-panel {
+    padding: var(--space-3) var(--space-4);
+  }
+  .tracker-root .trend-day-cell {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-root .trend-protein-bar {
+    transition: none;
+  }
+  .tracker-root .trend-range-btn {
+    transition: none;
+  }
+}

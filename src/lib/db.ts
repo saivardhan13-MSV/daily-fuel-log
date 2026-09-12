@@ -288,6 +288,12 @@ export interface DayTotals {
   protein: number;
   carbs: number;
   fat: number;
+  // True only when the user actually logged at least one entry that day.
+  // A day with nothing logged still gets a zero-filled row (so callers get
+  // one entry per calendar day), but `logged: false` is what distinguishes
+  // "not logged" from "logged and genuinely totaled zero" — callers doing
+  // averages or target-hit counts must filter on this, not on `cal > 0`.
+  logged: boolean;
 }
 
 // Per-day totals for the last `days` days (including today), oldest first,
@@ -314,7 +320,7 @@ export async function getRecentDailyTotals(
   const byDate = new Map<string, DayTotals>();
   for (const row of data ?? []) {
     const key = row.entry_date as string;
-    const existing = byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0 };
+    const existing = byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0, logged: true };
     existing.cal += Number(row.calories ?? 0);
     existing.protein += Number(row.protein ?? 0);
     existing.carbs += Number(row.carbs ?? 0);
@@ -326,7 +332,7 @@ export async function getRecentDailyTotals(
   const cursor = new Date(start);
   while (cursor <= end) {
     const key = formatDate(cursor);
-    out.push(byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0 });
+    out.push(byDate.get(key) ?? { date: key, cal: 0, protein: 0, carbs: 0, fat: 0, logged: false });
     cursor.setDate(cursor.getDate() + 1);
   }
   return out;
