@@ -296,6 +296,18 @@ export interface DayTotals {
   logged: boolean;
 }
 
+// The last `days` calendar days ending today, as local-calendar YYYY-MM-DD
+// bounds — shared by every range-bounded history query so a 30-day fetch
+// (daily totals, weight logs, ...) always agrees on exactly which 30 dates
+// that means, with the date math written in exactly one place.
+export function getRangeBounds(days: number): { start: string; end: string } {
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setDate(start.getDate() - (days - 1));
+  return { start: formatDate(start), end: formatDate(end) };
+}
+
 // Per-day totals for the last `days` days (including today), oldest first,
 // with every day present even if nothing was logged (filled with zeros).
 export async function getRecentDailyTotals(
@@ -303,17 +315,16 @@ export async function getRecentDailyTotals(
   userId: string,
   days: number,
 ): Promise<DayTotals[]> {
-  const end = new Date();
-  end.setHours(0, 0, 0, 0);
-  const start = new Date(end);
-  start.setDate(start.getDate() - (days - 1));
+  const { start: startStr, end: endStr } = getRangeBounds(days);
+  const start = new Date(startStr + "T00:00:00");
+  const end = new Date(endStr + "T00:00:00");
 
   const { data, error } = await supabase
     .from("daily_entries")
     .select("entry_date, calories, protein, carbs, fat")
     .eq("user_id", userId)
-    .gte("entry_date", formatDate(start))
-    .lte("entry_date", formatDate(end));
+    .gte("entry_date", startStr)
+    .lte("entry_date", endStr);
 
   if (error) throw error;
 
@@ -336,6 +347,36 @@ export async function getRecentDailyTotals(
     cursor.setDate(cursor.getDate() + 1);
   }
   return out;
+}
+
+export interface WeightLogRow {
+  id: string;
+  logged_date: string;
+  weight_kg: number;
+}
+
+// Real weigh-ins only, oldest first, bounded to [startDate, endDate] — no
+// zero-filling: an unlogged day simply has no row, unlike getRecentDailyTotals.
+export async function getWeightLogs(
+  supabase: SupabaseClient,
+  userId: string,
+  startDate: string,
+  endDate: string,
+): Promise<WeightLogRow[]> {
+  const { data, error } = await supabase
+    .from("weight_logs")
+    .select("id, logged_date, weight_kg")
+    .eq("user_id", userId)
+    .gte("logged_date", startDate)
+    .lte("logged_date", endDate)
+    .order("logged_date", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    logged_date: r.logged_date as string,
+    weight_kg: Number(r.weight_kg),
+  }));
 }
 
 // date (YYYY-MM-DD) -> total calories for that day, for the given month

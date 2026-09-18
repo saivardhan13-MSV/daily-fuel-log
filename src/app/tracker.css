@@ -2535,6 +2535,65 @@
   border-color: var(--accent);
 }
 
+/* ---- Weight: recent weigh-ins list. The form itself reuses .tgt-form/
+   .tgt-field (Targets settings) and .copy-status/.copy-error/.copy-actions/
+   .copy-cancel/.add-btn (Copy Previous sheets) verbatim — this is the only
+   genuinely new row shape this feature needs. ---- */
+.tracker-root .weight-recent {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.tracker-root .weight-recent-label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+.tracker-root .weight-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tracker-root .weight-recent-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.tracker-root .weight-recent-list li:last-child {
+  border-bottom: none;
+}
+.tracker-root .weight-recent-date {
+  color: var(--text-muted);
+  flex: 1;
+  min-width: 0;
+}
+.tracker-root .weight-recent-value {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tracker-root .weight-recent-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+.tracker-root .weight-delete-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.tracker-root .weight-delete-btn:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
   .tracker-root .trend-panel {
     padding: var(--space-3) var(--space-4);
@@ -2542,6 +2601,12 @@
   .tracker-root .trend-day-cell {
     width: 10px;
     height: 10px;
+  }
+  .tracker-root .weight-recent-list li {
+    flex-wrap: wrap;
+  }
+  .tracker-root .weight-recent-actions {
+    margin-left: auto;
   }
 }
 

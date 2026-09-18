@@ -1,9 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts";
-import type { DayTotals } from "@/lib/db";
+import { useMemo, useRef, useState } from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ReferenceLine,
+  Tooltip,
+} from "recharts";
+import type { DayTotals, WeightLogRow } from "@/lib/db";
 import { round1 } from "@/lib/nutrition";
+import { deleteWeightLog } from "@/app/actions/weight";
+import LogWeightSheet from "./LogWeightSheet";
 
 type RangeOption = 7 | 30;
 
@@ -42,6 +55,37 @@ interface ChartPoint {
   label: string;
   cal: number | null;
   logged: boolean;
+}
+
+interface WeightPoint {
+  date: string;
+  label: string;
+  weight: number;
+}
+
+// A real minus sign (not a hyphen) for a loss, "+" for a gain, nothing for
+// no change — this is the one place a weight change is rendered as text.
+function formatWeightChange(change: number): string {
+  const rounded = round1(Math.abs(change));
+  const sign = change > 0 ? "+" : change < 0 ? "−" : "";
+  return `${sign}${rounded} kg`;
+}
+
+function WeightTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: WeightPoint }>;
+}) {
+  if (!active || !payload || !payload.length) return null;
+  const point = payload[0].payload;
+  return (
+    <div className="trend-tooltip">
+      <div className="trend-tooltip-date">{fullDate(point.date)}</div>
+      <div className="trend-tooltip-val">{round1(point.weight)} kg</div>
+    </div>
+  );
 }
 
 function CalorieTooltip({
@@ -84,15 +128,52 @@ export default function TrendsView({
   targetProtein,
   currentStreak,
   weightKg,
+  weightLogs,
 }: {
   days: DayTotals[]; // oldest first, one zero-filled row per calendar day
   targetCalories: number | null;
   targetProtein: number | null;
   currentStreak: number;
-  weightKg: number | null;
+  weightKg: number | null; // body_targets reference value — a target-calculation input, never a measurement
+  weightLogs: WeightLogRow[]; // real weigh-ins, oldest first, bounded to the same 30-day window as `days`
 }) {
   const [range, setRange] = useState<RangeOption>(7);
   const reduced = prefersReducedMotion();
+
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetMode, setSheetMode] = useState<"log" | "edit">("log");
+  const [editEntry, setEditEntry] = useState<WeightLogRow | undefined>(undefined);
+  // Bumped on every open so LogWeightSheet fully remounts with fresh initial
+  // state each time — it can't reset its own form via a plain useState
+  // initializer since it stays mounted across opens (CopySheet needs that
+  // for its exit animation).
+  const [sheetInstanceKey, setSheetInstanceKey] = useState(0);
+  const sheetReturnFocusRef = useRef<HTMLElement | null>(null);
+  const logWeightTriggerRef = useRef<HTMLButtonElement>(null);
+
+  function openLogSheet() {
+    sheetReturnFocusRef.current = logWeightTriggerRef.current;
+    setSheetMode("log");
+    setEditEntry(undefined);
+    setSheetInstanceKey((k) => k + 1);
+    setSheetOpen(true);
+  }
+
+  function openEditSheet(entry: WeightLogRow, trigger: HTMLElement) {
+    sheetReturnFocusRef.current = trigger;
+    setSheetMode("edit");
+    setEditEntry(entry);
+    setSheetInstanceKey((k) => k + 1);
+    setSheetOpen(true);
+  }
+
+  async function handleDeleteWeight(entry: WeightLogRow) {
+    if (!confirm(`Delete the ${round1(entry.weight_kg)}kg measurement logged on ${fullDate(entry.logged_date)}?`)) {
+      return;
+    }
+    const result = await deleteWeightLog(entry.id);
+    if (result.error) alert(result.error);
+  }
 
   const rangeDays = useMemo(() => (range === 7 ? days.slice(-7) : days), [days, range]);
   const loggedDays = useMemo(() => rangeDays.filter((d) => d.logged), [rangeDays]);
@@ -143,6 +224,30 @@ export default function TrendsView({
     const vals = loggedDays.map((d) => d.protein);
     return Math.max(targetProtein ?? 0, ...vals, 1);
   }, [loggedDays, targetProtein]);
+
+  // Only real measurements whose date falls inside the currently selected
+  // range count — rangeDays[0].date is already the correct lower bound for
+  // whichever range (7D/30D) is selected, so no separate date math is needed.
+  // weightLogs itself never gets refetched when the range toggle changes.
+  const rangeWeightLogs = useMemo(() => {
+    if (rangeDays.length === 0) return weightLogs;
+    const rangeStart = rangeDays[0].date;
+    return weightLogs.filter((w) => w.logged_date >= rangeStart);
+  }, [weightLogs, rangeDays]);
+
+  const weightChartData: WeightPoint[] = useMemo(
+    () => rangeWeightLogs.map((w) => ({ date: w.logged_date, label: shortDate(w.logged_date), weight: w.weight_kg })),
+    [rangeWeightLogs],
+  );
+
+  const firstWeight = rangeWeightLogs[0];
+  const lastWeight = rangeWeightLogs[rangeWeightLogs.length - 1];
+  const weightChange = rangeWeightLogs.length >= 2 ? lastWeight.weight_kg - firstWeight.weight_kg : null;
+
+  // Recent weigh-ins deliberately show the full fetched 30-day set regardless
+  // of the 7D/30D chart range — better correction UX (you can still see and
+  // fix an entry from 3 weeks ago while viewing the 7-day chart).
+  const recentWeighIns = useMemo(() => [...weightLogs].reverse().slice(0, 8), [weightLogs]);
 
   return (
     <div className="trend-view">
@@ -321,12 +426,116 @@ export default function TrendsView({
       <div className="trend-panel">
         <div className="trend-panel-head">
           <span className="trend-panel-title">Weight</span>
+          <button type="button" ref={logWeightTriggerRef} className="copy-trigger" onClick={openLogSheet}>
+            <span aria-hidden="true">+</span> Log weight
+          </button>
         </div>
-        <p className="trend-empty-note">
-          {weightKg != null ? `Current weight: ${weightKg}kg. ` : ""}
-          Weight trend becomes available after multiple weigh-ins.
-        </p>
+
+        {rangeWeightLogs.length === 0 && (
+          <>
+            <p className="trend-empty-note">Log your weight to start seeing your trend.</p>
+            {weightKg != null && (
+              <p className="trend-empty-note trend-note-small">Target-calculation weight: {weightKg}kg</p>
+            )}
+          </>
+        )}
+
+        {rangeWeightLogs.length === 1 && (
+          <p className="trend-insight">
+            {round1(firstWeight.weight_kg)} kg — {fullDate(firstWeight.logged_date)}
+          </p>
+        )}
+
+        {rangeWeightLogs.length >= 2 && (
+          <>
+            <div className="trend-chart" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weightChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid stroke="var(--line)" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    stroke="var(--text-faint)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={{ stroke: "var(--line)" }}
+                  />
+                  <YAxis
+                    stroke="var(--text-faint)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    width={40}
+                    domain={["auto", "auto"]}
+                  />
+                  <Tooltip content={(props) => <WeightTooltip active={props.active} payload={props.payload as unknown as Array<{ payload: WeightPoint }> | undefined} />} cursor={{ stroke: "var(--line)" }} />
+                  <Line
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="var(--accent)"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: "var(--accent)", strokeWidth: 0 }}
+                    activeDot={{ r: 6 }}
+                    isAnimationActive={!reduced}
+                    animationDuration={220}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="trend-insight">
+              {round1(firstWeight.weight_kg)} kg → {round1(lastWeight.weight_kg)} kg
+              <br />
+              Change: {formatWeightChange(weightChange!)}
+            </p>
+            <details className="trend-details">
+              <summary>View as a list</summary>
+              <ul className="trend-data-list">
+                {rangeWeightLogs.map((w) => (
+                  <li key={w.id}>
+                    <span>{fullDate(w.logged_date)}</span>
+                    <span>{round1(w.weight_kg)} kg</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </>
+        )}
+
+        {recentWeighIns.length > 0 && (
+          <div className="weight-recent">
+            <span className="trend-panel-sub weight-recent-label">Recent weigh-ins</span>
+            <ul className="weight-recent-list">
+              {recentWeighIns.map((w) => (
+                <li key={w.id}>
+                  <span className="weight-recent-date">{fullDate(w.logged_date)}</span>
+                  <span className="weight-recent-value">{round1(w.weight_kg)} kg</span>
+                  <span className="weight-recent-actions">
+                    <button
+                      type="button"
+                      className="copy-trigger"
+                      onClick={(e) => openEditSheet(w, e.currentTarget)}
+                    >
+                      Edit
+                    </button>
+                    <button type="button" className="weight-delete-btn" onClick={() => handleDeleteWeight(w)}>
+                      Delete
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
+
+      <LogWeightSheet
+        key={sheetInstanceKey}
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        returnFocusRef={sheetReturnFocusRef}
+        mode={sheetMode}
+        editEntry={editEntry}
+        weightLogs={weightLogs}
+      />
     </div>
   );
 }

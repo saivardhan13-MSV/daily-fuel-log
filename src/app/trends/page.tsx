@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRecentDailyTotals, getBodyTargets, getStreak } from "@/lib/db";
+import { getRecentDailyTotals, getBodyTargets, getStreak, getWeightLogs, getRangeBounds } from "@/lib/db";
 import Topbar from "@/components/tracker/Topbar";
 import TrendsView from "@/components/tracker/TrendsView";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
@@ -17,10 +17,13 @@ export default async function TrendsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [days, targets, streak] = await Promise.all([
+  const { start, end } = getRangeBounds(RANGE_DAYS);
+
+  const [days, targets, streak, weightLogs] = await Promise.all([
     getRecentDailyTotals(supabase, user.id, RANGE_DAYS),
     getBodyTargets(supabase, user.id),
     getStreak(supabase, user.id),
+    getWeightLogs(supabase, user.id, start, end),
   ]);
 
   return (
@@ -33,6 +36,7 @@ export default async function TrendsPage() {
           targetProtein={targets?.target_protein ?? null}
           currentStreak={streak}
           weightKg={targets?.weight_kg ?? null}
+          weightLogs={weightLogs}
         />
         <FooterDisclaimer />
       </div>
