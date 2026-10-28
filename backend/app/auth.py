@@ -13,6 +13,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from supabase import ClientOptions, create_client
 
 from .config import Settings, get_settings
+from .jwt_verify import InvalidToken, verify_access_token
 
 _bearer = HTTPBearer(auto_error=False)
 
@@ -35,10 +36,20 @@ def get_current_user(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
     settings: Settings = Depends(get_settings),
 ) -> AuthedUser:
-    """Ask Supabase Auth to validate the token (the same check the Next.js
-    app does with getUser()), rather than trusting an unverified JWT payload."""
+    """Verify the Bearer token and return who it belongs to. Never trusts an
+    unverified JWT payload: either the signature is checked locally against
+    Supabase's public keys (default) or Supabase Auth is asked directly."""
     if creds is None or not creds.credentials:
         raise _unauthorized()
+
+    if settings.auth_mode == "jwks":
+        try:
+            return AuthedUser(
+                user_id=verify_access_token(creds.credentials, settings.supabase_url),
+                token=creds.credentials,
+            )
+        except InvalidToken:
+            raise _unauthorized() from None
 
     client = create_client(settings.supabase_url, settings.supabase_anon_key)
     try:

@@ -37,6 +37,7 @@ class TestAuth:
         assert res.status_code == 401
 
     def test_invalid_token_is_401(self, monkeypatch):
+        monkeypatch.setenv("AUTH_MODE", "remote")
         class BoomClient:
             class auth:
                 @staticmethod
@@ -49,6 +50,7 @@ class TestAuth:
         assert res.status_code == 401
 
     def test_user_id_comes_from_the_verified_token(self, monkeypatch):
+        monkeypatch.setenv("AUTH_MODE", "remote")
         class Resp:
             user = type("U", (), {"id": "verified-user-id"})()
 

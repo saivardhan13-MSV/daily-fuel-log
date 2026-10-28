@@ -39,7 +39,7 @@ implementation is exercised separately against a real project.
 | --- | --- |
 | `app/domain/` | Pure logic with no I/O: date validation and range bounds, macro totals, Mifflin-St Jeor targets, streaks, trend totals, quick-add ranking |
 | `app/repo.py` | `Repository` protocol and the Supabase implementation (user-scoped queries) |
-| `app/auth.py` | Verifies the Bearer token with Supabase Auth; `user_id` only ever comes from it |
+| `app/auth.py`, `app/jwt_verify.py` | Verifies the Bearer token (signature checked locally against Supabase's public JWKS); `user_id` only ever comes from it |
 | `app/routers/` | HTTP endpoints and request validation |
 | `app/food_search.py` | USDA FoodData Central lookup (fails soft) |
 | `tests/` | Domain, API and auth tests, plus a golden parity file |
@@ -64,9 +64,9 @@ implementation is exercised separately against a real project.
 ## Status
 
 Phases 1-3 are done: read endpoints, write endpoints, and the Next.js app can
-route all of its data and writes through this API. The old direct-to-Supabase
-code is still in place as the default; removing it (and choosing where to host
-this API) is Phase 4.
+route all of its data and writes through this API. Phase 4 is deployment on
+Vercel (below). The old direct-to-Supabase code stays as the default until the
+deployed API has been verified in production, and is removed after that.
 
 ## Using it from the Next.js app
 
@@ -118,3 +118,51 @@ server; actions return a short "Couldn't reach the server" message.
 - Water add is a read-modify-write like the original (PostgREST has no atomic
   increment), so two simultaneous taps can lose one. Fine for a one-person tap
   counter; an RPC would fix it if it ever mattered.
+
+## Auth modes
+
+`AUTH_MODE=jwks` (default) checks the token's signature locally against the
+public keys Supabase publishes at `/auth/v1/.well-known/jwks.json`. Only
+`ES256`/`RS256` are accepted (never `HS256` or `none`), and audience, issuer,
+expiry and subject are all required. There is no secret to store and no
+Supabase round trip per request, which is what makes it suitable for
+serverless.
+
+The trade-off: a token stays valid until it expires (an hour by default) even
+if the user signs out elsewhere, because nothing asks Supabase. PostgREST
+behaves the same way (signature and expiry only), so Row Level Security
+accepts exactly the tokens this API accepts. `AUTH_MODE=remote` asks Supabase
+Auth on every request instead, at the cost of one extra network call.
+
+## Deploy on Vercel
+
+The API is its own Vercel project, separate from the Next.js app, so the live
+site is untouched until you opt in with `API_URL`. Config lives in this folder:
+`pyproject.toml` (dependencies and `entrypoint = "app.main:app"`),
+`requirements.txt`, `.python-version`, `vercel.json` and `.vercelignore`.
+
+1. Vercel dashboard -> **Add New -> Project** -> import this same GitHub repo.
+2. Set **Root Directory** to `backend`. The framework preset should detect
+   FastAPI.
+3. Add environment variables (all environments):
+
+   | Name | Value |
+   | --- | --- |
+   | `SUPABASE_URL` | same as the app's `NEXT_PUBLIC_SUPABASE_URL` |
+   | `SUPABASE_ANON_KEY` | same as the app's `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+   | `USDA_FDC_API_KEY` | same as the app's (optional; food search is empty without it) |
+
+   Do **not** add the service-role key: this API never uses it.
+4. Deploy, then check `https://<your-api>.vercel.app/api/health` returns
+   `{"status":"ok"}` (and `/docs` for the interactive API docs).
+5. In the **Next.js** Vercel project -> Settings -> Environment Variables, add
+   `API_URL` = the API's URL (no trailing slash) for Production, then redeploy.
+6. Put both projects in the same Vercel **region** as your Supabase project
+   (Settings -> Functions) to keep the hops short.
+
+Roll back by deleting `API_URL` from the Next.js project and redeploying: the
+app goes straight back to querying Supabase itself.
+
+The API is publicly reachable but every route except `/api/health` needs a
+valid Supabase access token, and every query then runs as that user under Row
+Level Security.

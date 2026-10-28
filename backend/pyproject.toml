@@ -1,0 +1,18 @@
+[project]
+name = "daily-fuel-log-api"
+version = "0.1.0"
+description = "FastAPI backend for Daily Fuel Log"
+requires-python = ">=3.12"
+# Keep in sync with requirements.txt (tests/test_deploy_config.py enforces it).
+dependencies = [
+    "fastapi==0.162.0",
+    "pydantic==2.14.1",
+    "pydantic-settings==2.16.2",
+    "supabase==2.33.0",
+    "httpx==0.28.1",
+    "pyjwt[crypto]==2.15.1",
+]
+
+[tool.vercel]
+# Load the FastAPI instance as a package module so relative imports work.
+entrypoint = "app.main:app"

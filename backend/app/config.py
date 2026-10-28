@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,6 +27,10 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
     )
     usda_fdc_api_key: str | None = Field(default=None, validation_alias="USDA_FDC_API_KEY")
+    # "jwks": verify the token's signature locally (default, no Supabase round
+    # trip). "remote": ask Supabase Auth on every request, which also catches
+    # revoked sessions. See app/jwt_verify.py.
+    auth_mode: Literal["jwks", "remote"] = Field(default="jwks", validation_alias="AUTH_MODE")
     cors_origins: str = Field(default="http://localhost:3000", validation_alias="CORS_ORIGINS")
 
     @property
