@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from datetime import date
 from typing import Any
 
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 from app.auth import AuthedUser, get_current_user
 from app.config import get_settings
 from app.deps import get_repo, get_today
+from app.errors import DuplicateWeightDate
 from app.main import app
 from app.repo import group_by_section
 from app.sections import SECTION_KEYS
@@ -83,6 +85,52 @@ class FakeRepo:
 
     def recent_logged_dates(self, before, limit):
         return sorted({e["entry_date"] for e in self.entries if e["entry_date"] < before}, reverse=True)[:limit]
+
+    # ---- writes (same contract as SupabaseRepository) ----
+
+    def insert_entry(self, row):
+        new_id = str(uuid.uuid4())
+        self.entries.append({**row, "id": new_id, "created_at": f"{row['entry_date']}T12:00:00Z"})
+        return new_id
+
+    def insert_entries(self, rows):
+        for row in rows:
+            self.insert_entry(row)
+        return len(rows)
+
+    def delete_entry(self, entry_id):
+        self.entries = [e for e in self.entries if e["id"] != entry_id]
+
+    def delete_day(self, date_):
+        self.entries = [e for e in self.entries if e["entry_date"] != date_]
+
+    def set_water(self, date_, amount_ml):
+        self.water[date_] = amount_ml
+
+    def upsert_body_targets(self, row):
+        self.targets = row
+
+    def upsert_custom_food(self, row):
+        self.foods = [f for f in self.foods if f["name"] != row["name"]] + [{**row, "id": str(uuid.uuid4())}]
+
+    def upsert_weight(self, date_, weight_kg):
+        for w in self.weights:
+            if w["logged_date"] == date_:
+                w["weight_kg"] = weight_kg
+                return
+        self.weights.append({"id": str(uuid.uuid4()), "logged_date": date_, "weight_kg": weight_kg})
+
+    def update_weight(self, weight_id, date_, weight_kg):
+        target = next((w for w in self.weights if w["id"] == weight_id), None)
+        if target is None:
+            return False
+        if any(w["logged_date"] == date_ and w["id"] != weight_id for w in self.weights):
+            raise DuplicateWeightDate()
+        target["logged_date"], target["weight_kg"] = date_, weight_kg
+        return True
+
+    def delete_weight(self, weight_id):
+        self.weights = [w for w in self.weights if w["id"] != weight_id]
 
 
 @pytest.fixture(autouse=True)

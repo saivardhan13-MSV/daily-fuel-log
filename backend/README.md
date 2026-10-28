@@ -63,6 +63,31 @@ implementation is exercised separately against a real project.
 
 ## Status
 
-Phase 1 (read endpoints, auth, domain logic, tests) is complete. Mutations
-(entries, copy, water, targets, weight) are Phase 2; switching the Next.js
-actions over to this API is Phase 3.
+Phase 1 (read endpoints, auth, domain logic, tests) and Phase 2 (write
+endpoints) are complete. Switching the Next.js actions over to this API is
+Phase 3.
+
+## Write endpoints
+
+| Endpoint | Replaces |
+| --- | --- |
+| `POST /api/entries`, `DELETE /api/entries/{id}`, `DELETE /api/day?date=` | `addEntry`, `removeEntry`, `clearDay` |
+| `POST /api/copy` (`section: null` = whole day) | `copyEntries` |
+| `PUT /api/custom-foods` | `upsertCustomFood` |
+| `POST /api/water/add`, `POST /api/water/reset` | `addWater`, `resetWater` |
+| `PUT /api/body-targets` | `saveBodyTargets` (targets are computed server-side) |
+| `PUT /api/weight-logs`, `PATCH`/`DELETE /api/weight-logs/{id}` | `logWeight`, `updateWeightLog`, `deleteWeightLog` |
+
+- Bodies use `extra="forbid"`, so a `user_id` (or client-computed macros) is a
+  422, not silently ignored. The repository stamps `user_id` from the token.
+- Errors are `{"detail": "<one readable string>"}`. Database failures are
+  logged server-side and surface only as a generic message ("Failed to add
+  item"), never Postgres text.
+- Stricter than the TypeScript where that relied on the database: food names
+  and quantities, UUID ids, target ranges, and NaN/Infinity (Python's JSON
+  parser accepts them) are all rejected up front.
+- Copy re-reads the source rows on the server and inserts them in one batch;
+  it rejects a source date on or after the destination.
+- Water add is a read-modify-write like the original (PostgREST has no atomic
+  increment), so two simultaneous taps can lose one. Fine for a one-person tap
+  counter; an RPC would fix it if it ever mattered.

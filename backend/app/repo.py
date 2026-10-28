@@ -4,12 +4,19 @@ so a bug in one layer cannot expose another user's rows."""
 
 from __future__ import annotations
 
+import logging
+from datetime import datetime, timezone
 from typing import Any, Protocol
 
+from postgrest.exceptions import APIError
+
 from .domain.nutrition import safe_num
+from .errors import DuplicateWeightDate, StorageError
 from .sections import SECTION_KEYS
 
-ENTRY_COLUMNS = "id, section, food_name, qty, qty_label, unit, carbs, protein, fat, calories"
+log = logging.getLogger(__name__)
+
+ENTRY_COLUMNS ="id, section, food_name, qty, qty_label, unit, carbs, protein, fat, calories"
 
 
 class Repository(Protocol):
@@ -27,6 +34,37 @@ class Repository(Protocol):
     def weight_logs(self, start: str, end: str) -> list[dict[str, Any]]: ...
     def nearest_prior_logged_date(self, before: str, section: str | None) -> str | None: ...
     def recent_logged_dates(self, before: str, limit: int) -> list[str]: ...
+
+    # Writes. The repository stamps user_id and updated_at; callers never
+    # supply either, so a request body cannot name another user's rows.
+    def insert_entry(self, row: dict[str, Any]) -> str: ...
+    def insert_entries(self, rows: list[dict[str, Any]]) -> int: ...
+    def delete_entry(self, entry_id: str) -> None: ...
+    def delete_day(self, date: str) -> None: ...
+    def set_water(self, date: str, amount_ml: float) -> None: ...
+    def upsert_body_targets(self, row: dict[str, Any]) -> None: ...
+    def upsert_custom_food(self, row: dict[str, Any]) -> None: ...
+    def upsert_weight(self, date: str, weight_kg: float) -> None: ...
+    def update_weight(self, weight_id: str, date: str, weight_kg: float) -> bool: ...
+    def delete_weight(self, weight_id: str) -> None: ...
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _run(query: Any, what: str) -> Any:
+    """Execute a write, turning any driver error into StorageError."""
+    try:
+        return query.execute()
+    except APIError as exc:
+        if exc.code == "23505":
+            raise
+        log.error("%s failed: %s", what, exc)
+        raise StorageError(what) from exc
+    except Exception as exc:  # network, JSON, auth
+        log.error("%s failed: %s", what, exc)
+        raise StorageError(what) from exc
 
 
 def _entry_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -203,3 +241,82 @@ class SupabaseRepository:
             if len(out) >= limit:
                 break
         return out
+
+    # ---- writes -----------------------------------------------------------
+
+    def insert_entry(self, row: dict[str, Any]) -> str:
+        res = _run(
+            self._table("daily_entries").insert({**row, "user_id": self._uid}),
+            "Failed to add item",
+        )
+        return res.data[0]["id"]
+
+    def insert_entries(self, rows: list[dict[str, Any]]) -> int:
+        if not rows:
+            return 0
+        stamped = [{**r, "user_id": self._uid} for r in rows]
+        _run(self._table("daily_entries").insert(stamped), "Failed to copy")
+        return len(stamped)
+
+    def delete_entry(self, entry_id: str) -> None:
+        _run(
+            self._table("daily_entries").delete().eq("id", entry_id).eq("user_id", self._uid),
+            "Failed to remove item",
+        )
+
+    def delete_day(self, date: str) -> None:
+        _run(
+            self._table("daily_entries").delete().eq("user_id", self._uid).eq("entry_date", date),
+            "Failed to clear day",
+        )
+
+    def set_water(self, date: str, amount_ml: float) -> None:
+        _run(
+            self._table("water_intake").upsert(
+                {"user_id": self._uid, "entry_date": date, "amount_ml": amount_ml, "updated_at": _now_iso()},
+                on_conflict="user_id,entry_date",
+            ),
+            "Failed to update water intake",
+        )
+
+    def upsert_body_targets(self, row: dict[str, Any]) -> None:
+        _run(
+            self._table("body_targets").upsert({**row, "user_id": self._uid, "updated_at": _now_iso()}),
+            "Failed to save targets",
+        )
+
+    def upsert_custom_food(self, row: dict[str, Any]) -> None:
+        _run(
+            self._table("custom_foods").upsert({**row, "user_id": self._uid}, on_conflict="user_id,name"),
+            "Failed to save food",
+        )
+
+    def upsert_weight(self, date: str, weight_kg: float) -> None:
+        _run(
+            self._table("weight_logs").upsert(
+                {"user_id": self._uid, "logged_date": date, "weight_kg": weight_kg, "updated_at": _now_iso()},
+                on_conflict="user_id,logged_date",
+            ),
+            "Failed to save weight",
+        )
+
+    def update_weight(self, weight_id: str, date: str, weight_kg: float) -> bool:
+        """Correct one row by id. A date collision raises DuplicateWeightDate
+        (the unique index refuses it) rather than overwriting the other row."""
+        query = (
+            self._table("weight_logs")
+            .update({"logged_date": date, "weight_kg": weight_kg, "updated_at": _now_iso()})
+            .eq("id", weight_id)
+            .eq("user_id", self._uid)
+        )
+        try:
+            res = _run(query, "Failed to update weight")
+        except APIError as exc:
+            raise DuplicateWeightDate() from exc
+        return bool(res.data)
+
+    def delete_weight(self, weight_id: str) -> None:
+        _run(
+            self._table("weight_logs").delete().eq("id", weight_id).eq("user_id", self._uid),
+            "Failed to delete weight",
+        )
