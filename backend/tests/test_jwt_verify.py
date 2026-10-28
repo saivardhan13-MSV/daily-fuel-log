@@ -184,3 +184,12 @@ def test_remote_mode_still_asks_supabase(monkeypatch):
     monkeypatch.setattr(auth, "create_client", lambda *a, **k: Client)
     res = _client().get("/api/me", headers={"Authorization": "Bearer opaque"})
     assert res.json() == {"user_id": "from-supabase"} and asked == ["opaque"]
+
+
+def test_keys_load_on_a_freshly_booted_instance(monkeypatch, jwks):
+    """time.monotonic() counts from boot, so on a new serverless instance it is
+    a few seconds. The very first lookup must still fetch the keys."""
+    monkeypatch.setattr(jwt_verify.time, "monotonic", lambda: 5.0)
+    jwt_verify.clear_key_cache()
+    assert verify(make_token()) == USER_ID
+    assert jwks["n"] == 1

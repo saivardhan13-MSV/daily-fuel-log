@@ -6,6 +6,7 @@ accepts a user_id from the client."""
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 from fastapi import Depends, HTTPException, status
@@ -15,6 +16,7 @@ from supabase import ClientOptions, create_client
 from .config import Settings, get_settings
 from .jwt_verify import InvalidToken, verify_access_token
 
+log = logging.getLogger(__name__)
 _bearer = HTTPBearer(auto_error=False)
 
 
@@ -48,7 +50,9 @@ def get_current_user(
                 user_id=verify_access_token(creds.credentials, settings.supabase_url),
                 token=creds.credentials,
             )
-        except InvalidToken:
+        except InvalidToken as exc:
+            # Why, for the server log only; the client just gets 401.
+            log.warning("access token rejected: %s", exc)
             raise _unauthorized() from None
 
     client = create_client(settings.supabase_url, settings.supabase_anon_key)

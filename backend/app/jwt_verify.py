@@ -48,19 +48,24 @@ class _KeyCache:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._keys: dict[str, jwt.PyJWK] = {}
-        self._fetched_at = 0.0
+        # None = never fetched. (Not 0.0: monotonic() counts from boot, so on a
+        # freshly started serverless instance it can be smaller than the
+        # refetch interval and a 0.0 sentinel would look like a recent fetch.)
+        self._fetched_at: float | None = None
 
     def clear(self) -> None:
         with self._lock:
-            self._keys, self._fetched_at = {}, 0.0
+            self._keys, self._fetched_at = {}, None
 
     def get(self, jwks_url: str, kid: str) -> jwt.PyJWK:
         with self._lock:
             now = time.monotonic()
-            stale = now - self._fetched_at > JWKS_TTL_SECONDS
-            can_refetch = now - self._fetched_at > MIN_REFETCH_INTERVAL_SECONDS
-            if (kid not in self._keys and can_refetch) or stale:
+            if self._fetched_at is None:
                 self._refresh(jwks_url, now)
+            else:
+                age = now - self._fetched_at
+                if age > JWKS_TTL_SECONDS or (kid not in self._keys and age > MIN_REFETCH_INTERVAL_SECONDS):
+                    self._refresh(jwks_url, now)
             key = self._keys.get(kid)
         if key is None:
             raise InvalidToken("unknown signing key")

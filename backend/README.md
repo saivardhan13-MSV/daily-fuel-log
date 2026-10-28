@@ -160,6 +160,19 @@ site is untouched until you opt in with `API_URL`. Config lives in this folder:
 6. Put both projects in the same Vercel **region** as your Supabase project
    (Settings -> Functions) to keep the hops short.
 
+Deploying from the CLI instead (what was used for the first deploy):
+
+- Create/link the project from `backend/` with `vercel link --yes --project
+  <name> --scope <team>`, then set the project's **Root Directory** to
+  `backend` (dashboard, or `vercel api /v9/projects/<id> -X PATCH -f
+  rootDirectory=backend`; in Git Bash prefix with `MSYS_NO_PATHCONV=1`).
+- Deploy from the **repo root** with `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`
+  set (see `backend/.vercel/project.json`). Do not run `vercel link` at the
+  repo root: it writes a `.env.local` there and would overwrite the Next.js
+  app's real one.
+- Once Root Directory is `backend`, pushes to `main` redeploy the API through
+  the connected GitHub repo.
+
 Roll back by deleting `API_URL` from the Next.js project and redeploying: the
 app goes straight back to querying Supabase itself.
 
