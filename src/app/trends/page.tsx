@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRecentDailyTotals, getBodyTargets, getStreak, getWeightLogs, getRangeBounds } from "@/lib/db";
+import { getRecentDailyTotals, getBodyTargets, getStreak, getWeightLogs } from "@/lib/data";
+import { getRangeBounds } from "@/lib/db";
 import Topbar from "@/components/tracker/Topbar";
 import TrendsView from "@/components/tracker/TrendsView";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";

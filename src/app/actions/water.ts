@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { apiEnabled, apiRequest, runApiAction } from "@/lib/api";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -13,6 +14,16 @@ async function requireUser() {
 }
 
 export async function addWater(date: string, deltaMl: number): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "POST", "/api/water/add", { body: { date, deltaMl } });
+        return {};
+      },
+      ["/"],
+      "Failed to update water intake",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
 
@@ -45,6 +56,16 @@ export async function addWater(date: string, deltaMl: number): Promise<{ error?:
 }
 
 export async function resetWater(date: string): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "POST", "/api/water/reset", { body: { date } });
+        return {};
+      },
+      ["/"],
+      "Failed to reset water intake",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
     const { error } = await supabase.from("water_intake").upsert(

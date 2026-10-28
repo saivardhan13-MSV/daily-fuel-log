@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { apiEnabled, apiRequest, runApiAction } from "@/lib/api";
 import { calculateTargets, type ActivityLevel, type Goal, type Sex } from "@/lib/targets";
 
 export interface SaveBodyTargetsInput {
@@ -16,6 +17,17 @@ export interface SaveBodyTargetsInput {
 export async function saveBodyTargets(
   input: SaveBodyTargetsInput,
 ): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    // The API computes the calorie and macro targets itself from these inputs.
+    return runApiAction(
+      async (client) => {
+        await apiRequest(client, "PUT", "/api/body-targets", { body: input });
+        return {};
+      },
+      ["/", "/targets"],
+      "Failed to save targets",
+    );
+  }
   const supabase = await createClient();
   const {
     data: { user },

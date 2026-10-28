@@ -7,7 +7,7 @@ import {
   getWaterIntake,
   getStreak,
   getQuickAddSuggestions,
-} from "@/lib/db";
+} from "@/lib/data";
 import { totalsForEntries, round1, todayStr } from "@/lib/nutrition";
 import { SECTIONS } from "@/lib/food-db";
 import Topbar from "@/components/tracker/Topbar";

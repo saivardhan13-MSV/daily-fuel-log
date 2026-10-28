@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { todayStr } from "@/lib/nutrition";
+import { apiEnabled, apiRequest, runApiAction } from "@/lib/api";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -83,6 +84,16 @@ export interface LogWeightInput {
 // (user_id, logged_date) — logging again for a date that already has a
 // measurement silently corrects that day's value, never creates a second row.
 export async function logWeight(input: LogWeightInput): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "PUT", "/api/weight-logs", { body: input });
+        return {};
+      },
+      ["/trends"],
+      "Failed to save weight",
+    );
+  }
   if (!isValidDateString(input.loggedDate)) return { error: "Invalid date" };
   if (!isValidWeight(input.weightKg)) return { error: "Enter a weight between 0 and 500 kg" };
   if (input.loggedDate > resolveFutureCheckReference(input.clientToday, todayStr())) {
@@ -121,6 +132,17 @@ export interface UpdateWeightLogInput {
 // already has a different measurement must fail cleanly, never silently
 // overwrite that other row (which an upsert-by-date would do instead).
 export async function updateWeightLog(input: UpdateWeightLogInput): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    const { id, ...fields } = input;
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "PATCH", `/api/weight-logs/${encodeURIComponent(id)}`, { body: fields });
+        return {};
+      },
+      ["/trends"],
+      "Failed to update weight",
+    );
+  }
   if (!isValidId(input.id)) return { error: "Invalid request" };
   if (!isValidDateString(input.loggedDate)) return { error: "Invalid date" };
   if (!isValidWeight(input.weightKg)) return { error: "Enter a weight between 0 and 500 kg" };
@@ -155,6 +177,16 @@ export async function updateWeightLog(input: UpdateWeightLogInput): Promise<{ er
 }
 
 export async function deleteWeightLog(id: string): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "DELETE", `/api/weight-logs/${encodeURIComponent(id)}`);
+        return {};
+      },
+      ["/trends"],
+      "Failed to delete weight",
+    );
+  }
   if (!isValidId(id)) return { error: "Invalid request" };
 
   try {

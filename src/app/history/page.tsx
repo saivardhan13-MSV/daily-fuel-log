@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMonthTotals, getStreak, getBodyTargets } from "@/lib/db";
+import { getMonthTotals, getStreak, getBodyTargets } from "@/lib/data";
 import { todayStr } from "@/lib/nutrition";
 import Topbar from "@/components/tracker/Topbar";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";

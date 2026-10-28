@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getBodyTargets, getStreak } from "@/lib/db";
+import { getBodyTargets, getStreak } from "@/lib/data";
 import Topbar from "@/components/tracker/Topbar";
 import TargetsForm from "@/components/tracker/TargetsForm";
 import { TargetsDisclaimer, FooterDisclaimer } from "@/components/tracker/Disclaimer";

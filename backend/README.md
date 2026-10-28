@@ -63,9 +63,36 @@ implementation is exercised separately against a real project.
 
 ## Status
 
-Phase 1 (read endpoints, auth, domain logic, tests) and Phase 2 (write
-endpoints) are complete. Switching the Next.js actions over to this API is
-Phase 3.
+Phases 1-3 are done: read endpoints, write endpoints, and the Next.js app can
+route all of its data and writes through this API. The old direct-to-Supabase
+code is still in place as the default; removing it (and choosing where to host
+this API) is Phase 4.
+
+## Using it from the Next.js app
+
+Opt-in via one server-only env var in the repo's `.env.local`:
+
+```
+API_URL=http://localhost:8010
+```
+
+- **Unset (default):** the app queries Supabase itself, exactly as before.
+- **Set:** pages read through `src/lib/data.ts` and Server Actions call this
+  API through `src/lib/api.ts`, forwarding the user's Supabase access token.
+  Action signatures, validation messages and `revalidatePath` calls are
+  unchanged, so no component changed.
+
+Both modes render identical pages for the same account (compared page by page),
+and every write action was exercised through the UI in API mode.
+
+`/api/streak`, `/api/trends` and `/api/weight-logs` accept an optional
+`today=YYYY-MM-DD` so the two services slice the same window even when they
+run in different timezones. It is trusted only within +/-1 day of this
+server's date, like the future-date check on writes.
+
+If the API is down, pages show the app's existing "Something went wrong / Try
+again" screen and the cause (e.g. `ECONNREFUSED`) is logged by the Next.js
+server; actions return a short "Couldn't reach the server" message.
 
 ## Write endpoints
 

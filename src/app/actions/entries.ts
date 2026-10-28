@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SECTIONS, type SectionKey } from "@/lib/food-db";
 import { getEntriesForDate, getNearestPriorLoggedDate, getRecentLoggedDates } from "@/lib/db";
 import type { EntriesBySection, EntryItem } from "@/lib/nutrition";
+import { ApiError, apiEnabled, apiRequest, runApiAction } from "@/lib/api";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -29,6 +30,16 @@ export interface AddEntryInput {
 }
 
 export async function addEntry(input: AddEntryInput): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "POST", "/api/entries", { body: input });
+        return {};
+      },
+      ["/"],
+      "Failed to add item",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
     const { error } = await supabase.from("daily_entries").insert({
@@ -53,6 +64,16 @@ export async function addEntry(input: AddEntryInput): Promise<{ error?: string }
 }
 
 export async function removeEntry(id: string): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "DELETE", `/api/entries/${encodeURIComponent(id)}`);
+        return {};
+      },
+      ["/"],
+      "Failed to remove item",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
     const { error } = await supabase
@@ -69,6 +90,16 @@ export async function removeEntry(id: string): Promise<{ error?: string }> {
 }
 
 export async function clearDay(date: string): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "DELETE", "/api/day", { query: { date } });
+        return {};
+      },
+      ["/"],
+      "Failed to clear day",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
     const { error } = await supabase
@@ -111,6 +142,16 @@ export async function getMealCopyPreview(
   destDate: string,
   section: SectionKey,
 ): Promise<MealCopyPreview | { error: string } | null> {
+  if (apiEnabled()) {
+    try {
+      const supabase = await createClient();
+      return await apiRequest<MealCopyPreview | null>(supabase, "GET", "/api/copy/meal-preview", {
+        query: { dest_date: destDate, section },
+      });
+    } catch (e) {
+      return { error: e instanceof ApiError ? e.message : "Failed to load previous meal" };
+    }
+  }
   if (!isValidDateString(destDate) || !isValidSection(section)) {
     return { error: "Invalid request" };
   }
@@ -137,6 +178,16 @@ export async function getDayCopyPreview(
   destDate: string,
   sourceDate?: string,
 ): Promise<DayCopyPreview | { error: string } | null> {
+  if (apiEnabled()) {
+    try {
+      const supabase = await createClient();
+      return await apiRequest<DayCopyPreview | null>(supabase, "GET", "/api/copy/day-preview", {
+        query: { dest_date: destDate, source_date: sourceDate },
+      });
+    } catch (e) {
+      return { error: e instanceof ApiError ? e.message : "Failed to load previous day" };
+    }
+  }
   if (!isValidDateString(destDate) || (sourceDate !== undefined && !isValidDateString(sourceDate))) {
     return { error: "Invalid request" };
   }
@@ -153,6 +204,16 @@ export async function getDayCopyPreview(
 }
 
 export async function getRecentDatesForCopy(destDate: string): Promise<string[]> {
+  if (apiEnabled()) {
+    try {
+      const supabase = await createClient();
+      return await apiRequest<string[]>(supabase, "GET", "/api/copy/recent-dates", {
+        query: { dest_date: destDate },
+      });
+    } catch {
+      return [];
+    }
+  }
   if (!isValidDateString(destDate)) return [];
   try {
     const { supabase, userId } = await requireUser();
@@ -177,6 +238,13 @@ export interface CopyEntriesInput {
 export async function copyEntries(
   input: CopyEntriesInput,
 ): Promise<{ error?: string; copiedCount?: number }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      (supabase) => apiRequest<{ copiedCount: number }>(supabase, "POST", "/api/copy", { body: input }),
+      ["/"],
+      "Failed to copy",
+    );
+  }
   if (
     !isValidDateString(input.destDate) ||
     !isValidDateString(input.sourceDate) ||
@@ -241,6 +309,18 @@ export interface UpsertCustomFoodInput {
 export async function upsertCustomFood(
   input: UpsertCustomFoodInput,
 ): Promise<{ error?: string }> {
+  if (apiEnabled()) {
+    return runApiAction(
+      async (supabase) => {
+        await apiRequest(supabase, "PUT", "/api/custom-foods", {
+          body: { ...input, pieceWeight: input.pieceWeight ?? null, density: input.density ?? null },
+        });
+        return {};
+      },
+      ["/"],
+      "Failed to save food",
+    );
+  }
   try {
     const { supabase, userId } = await requireUser();
     const { error } = await supabase.from("custom_foods").upsert(

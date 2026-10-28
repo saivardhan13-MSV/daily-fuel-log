@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query
 
 from ..auth import AuthedUser, get_current_user
 from ..config import Settings, get_settings
-from ..deps import bad_request, date_param, get_repo, get_today, require_date, require_section
+from ..deps import bad_request, date_param, get_reference_today, get_repo, require_date, require_section
 from ..domain.dates import range_bounds
 from ..domain.quickadd import rank_suggestions
 from ..domain.streak import compute_streak
@@ -70,7 +70,7 @@ def water(date: str = Depends(date_param), repo: Repository = Depends(get_repo))
 
 
 @router.get("/streak")
-def streak(repo: Repository = Depends(get_repo), today: date = Depends(get_today)) -> dict[str, int]:
+def streak(repo: Repository = Depends(get_repo), today: date = Depends(get_reference_today)) -> dict[str, int]:
     return {"streak": compute_streak(repo.logged_dates(STREAK_LOOKBACK_ROWS), today)}
 
 
@@ -89,7 +89,7 @@ def _validated_days(days: int) -> int:
 def trends(
     days: int = Query(30),
     repo: Repository = Depends(get_repo),
-    today: date = Depends(get_today),
+    today: date = Depends(get_reference_today),
 ):
     """Per-day totals over a bounded window, fetched with one query. The 7-day
     view is a slice of the 30-day one, so clients never re-query to switch."""
@@ -104,7 +104,7 @@ def trends(
 def weight_logs(
     days: int = Query(30),
     repo: Repository = Depends(get_repo),
-    today: date = Depends(get_today),
+    today: date = Depends(get_reference_today),
 ):
     """Real weigh-ins only (no zero-filling), over the same window as /trends."""
     start, end = range_bounds(_validated_days(days), today)

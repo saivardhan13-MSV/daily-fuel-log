@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ApiError, apiEnabled, apiRequest } from "@/lib/api";
 
 export interface SearchResult {
   name: string;
@@ -76,6 +77,19 @@ export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (query.length < 3) {
     return NextResponse.json({ results: [] });
+  }
+
+  if (apiEnabled()) {
+    try {
+      const results = await apiRequest<SearchResult[]>(supabase, "GET", "/api/food-search", { query: { q: query } });
+      return NextResponse.json({ results });
+    } catch (e) {
+      // Fail soft like the direct path: local foods still work without USDA.
+      if (e instanceof ApiError && e.status === 401) {
+        return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+      }
+      return NextResponse.json({ results: [] });
+    }
   }
 
   const results = await searchUsda(query);
