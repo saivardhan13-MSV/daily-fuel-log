@@ -157,7 +157,13 @@ site is untouched until you opt in with `API_URL`. Config lives in this folder:
 5. In the **Next.js** Vercel project -> Settings -> Environment Variables, add
    `API_URL` = the API's URL (no trailing slash) for Production, then redeploy.
 6. Put both projects in the same Vercel **region** as your Supabase project
-   (Settings -> Functions) to keep the hops short.
+   (Settings -> Functions) to keep the hops short. This matters more than it
+   looks: the API opens a fresh HTTPS connection to Supabase per request, so a
+   coast-to-coast gap is paid several times per call. For this project
+   (Supabase in AWS `us-west-2`) both Vercel projects run in `pdx1` (Portland);
+   moving them from `iad1` took a database-backed call from ~400 ms to ~210 ms
+   measured from the developer's machine. Region changes only apply on the
+   next deployment, so redeploy after changing it.
 
 Deploying from the CLI instead (what was used for the first deploy):
 
