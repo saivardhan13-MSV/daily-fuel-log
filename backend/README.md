@@ -63,36 +63,35 @@ implementation is exercised separately against a real project.
 
 ## Status
 
-Phases 1-3 are done: read endpoints, write endpoints, and the Next.js app can
-route all of its data and writes through this API. Phase 4 is deployment on
-Vercel (below). The old direct-to-Supabase code stays as the default until the
-deployed API has been verified in production, and is removed after that.
+The Python API is the app's only data layer: the Next.js app has no direct
+database queries left. Phases 1-4 are done (read endpoints, write endpoints,
+cutover of the Next.js app, deployment on Vercel), and production runs through
+it. The original TypeScript query code was removed once the deployed API was
+verified; it is in git history if you ever need to compare behaviour.
 
 ## Using it from the Next.js app
 
-Opt-in via one server-only env var in the repo's `.env.local`:
+One required server-only env var in the repo's `.env.local` (and in the
+Next.js Vercel project, for every environment you deploy):
 
 ```
-API_URL=http://localhost:8010
+API_URL=http://localhost:8010      # or the deployed API's URL
 ```
 
-- **Unset (default):** the app queries Supabase itself, exactly as before.
-- **Set:** pages read through `src/lib/data.ts` and Server Actions call this
-  API through `src/lib/api.ts`, forwarding the user's Supabase access token.
-  Action signatures, validation messages and `revalidatePath` calls are
-  unchanged, so no component changed.
-
-Both modes render identical pages for the same account (compared page by page),
-and every write action was exercised through the UI in API mode.
+Pages read through `src/lib/data.ts` and Server Actions call the API through
+`src/lib/api.ts`, forwarding the user's Supabase access token. Login and the
+session cookie stay in Next.js; the API verifies the token and runs every query
+as that user. Without `API_URL` the app shows its error screen and logs
+"API_URL is not set".
 
 `/api/streak`, `/api/trends` and `/api/weight-logs` accept an optional
 `today=YYYY-MM-DD` so the two services slice the same window even when they
 run in different timezones. It is trusted only within +/-1 day of this
 server's date, like the future-date check on writes.
 
-If the API is down, pages show the app's existing "Something went wrong / Try
-again" screen and the cause (e.g. `ECONNREFUSED`) is logged by the Next.js
-server; actions return a short "Couldn't reach the server" message.
+If the API is down, pages show the app's "Something went wrong / Try again"
+screen and the cause (e.g. `ECONNREFUSED`) is logged by the Next.js server;
+actions return a short "Couldn't reach the server" message.
 
 ## Write endpoints
 
@@ -173,8 +172,10 @@ Deploying from the CLI instead (what was used for the first deploy):
 - Once Root Directory is `backend`, pushes to `main` redeploy the API through
   the connected GitHub repo.
 
-Roll back by deleting `API_URL` from the Next.js project and redeploying: the
-app goes straight back to querying Supabase itself.
+To roll back a bad API release, redeploy the previous deployment of the API
+project from the Vercel dashboard (Deployments -> ... -> Promote to
+Production). The Next.js app only needs `API_URL` to keep pointing at the same
+URL.
 
 The API is publicly reachable but every route except `/api/health` needs a
 valid Supabase access token, and every query then runs as that user under Row

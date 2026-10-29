@@ -2,18 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-// Client for the Python API in backend/. Server-side only: it forwards the
-// signed-in user's Supabase access token, and the API verifies that token and
-// runs every query as that user. The browser never talks to the API directly.
-//
-// Opt-in: with API_URL unset the app keeps using Supabase directly, exactly as
-// before, so production is unchanged until the API is deployed and API_URL set.
+// Client for the Python API in backend/, which owns all data access. Server-side
+// only: it forwards the signed-in user's Supabase access token, and the API
+// verifies that token and runs every query as that user. The browser never
+// talks to the API directly. Requires API_URL (see .env.local.example).
 
 const REQUEST_TIMEOUT_MS = 10_000;
-
-export function apiEnabled(): boolean {
-  return Boolean(process.env.API_URL);
-}
 
 export class ApiError extends Error {
   constructor(
@@ -38,7 +32,10 @@ export async function apiRequest<T>(
   { query, body }: RequestOptions = {},
 ): Promise<T> {
   const base = process.env.API_URL;
-  if (!base) throw new ApiError("API is not configured", 500);
+  if (!base) {
+    console.error("[api] API_URL is not set; the app cannot load or save data without it");
+    throw new ApiError("The app isn't configured correctly. Try again later.", 500);
+  }
 
   // getUser() has already verified the user on the page/action; this only
   // reads the token from the session cookie to hand to the API, which

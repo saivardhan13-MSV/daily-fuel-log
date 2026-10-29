@@ -13,7 +13,7 @@ import {
   ReferenceLine,
   Tooltip,
 } from "recharts";
-import type { DayTotals, WeightLogRow } from "@/lib/db";
+import type { DayTotals, WeightLogRow } from "@/lib/data";
 import { round1 } from "@/lib/nutrition";
 import { deleteWeightLog } from "@/app/actions/weight";
 import LogWeightSheet from "./LogWeightSheet";

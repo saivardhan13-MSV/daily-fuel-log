@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FOOD_DB, PIECE_WEIGHTS, DENSITIES, type SectionKey } from "@/lib/food-db";
 import { capitalize, safeNum } from "@/lib/nutrition";
 import { addEntry, upsertCustomFood } from "@/app/actions/entries";
-import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
+import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/data";
 import type { SearchResult } from "@/app/api/food-search/route";
 
 interface Suggestion {

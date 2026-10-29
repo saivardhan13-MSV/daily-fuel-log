@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { ApiError, apiEnabled, apiRequest } from "@/lib/api";
+import { ApiError, apiRequest } from "@/lib/api";
 
 export interface SearchResult {
   name: string;
@@ -11,60 +11,8 @@ export interface SearchResult {
   source: string;
 }
 
-// USDA nutrient numbers (stable across food types): Energy(kcal)=208, Protein=203,
-// Fat=204, Carbohydrate by difference=205.
-function pickNutrient(
-  nutrients: Array<{ nutrientNumber?: string; unitName?: string; value?: number }>,
-  number: string,
-): number | null {
-  const hit = nutrients.find(
-    (n) => n.nutrientNumber === number && (number !== "208" || n.unitName === "KCAL"),
-  );
-  return hit && typeof hit.value === "number" ? hit.value : null;
-}
-
-async function searchUsda(query: string): Promise<SearchResult[]> {
-  const apiKey = process.env.USDA_FDC_API_KEY;
-  if (!apiKey) return [];
-
-  const url = new URL("https://api.nal.usda.gov/fdc/v1/foods/search");
-  url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("query", query);
-  url.searchParams.set("pageSize", "8");
-
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return [];
-    const data = await res.json();
-    const foods = Array.isArray(data.foods) ? data.foods : [];
-
-    const out: SearchResult[] = [];
-    for (const food of foods) {
-      const nutrients = Array.isArray(food.foodNutrients) ? food.foodNutrients : [];
-      const cal = pickNutrient(nutrients, "208");
-      const protein = pickNutrient(nutrients, "203");
-      const fat = pickNutrient(nutrients, "204");
-      const carbs = pickNutrient(nutrients, "205");
-      const name: string | undefined = food.description;
-
-      if (!name || cal === null || protein === null || fat === null || carbs === null) continue;
-
-      out.push({
-        name: name.trim().slice(0, 80),
-        carbs,
-        protein,
-        fat,
-        cal,
-        source: food.brandOwner ? String(food.brandOwner).slice(0, 30) : "USDA",
-      });
-    }
-    return out;
-  } catch {
-    // network error or timeout — fail soft, local results still work
-    return [];
-  }
-}
-
+// Thin proxy: the USDA FoodData Central lookup (and its API key) live in the
+// Python API. This route only keeps the browser same-origin and signed-in.
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -79,19 +27,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: [] });
   }
 
-  if (apiEnabled()) {
-    try {
-      const results = await apiRequest<SearchResult[]>(supabase, "GET", "/api/food-search", { query: { q: query } });
-      return NextResponse.json({ results });
-    } catch (e) {
-      // Fail soft like the direct path: local foods still work without USDA.
-      if (e instanceof ApiError && e.status === 401) {
-        return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-      }
-      return NextResponse.json({ results: [] });
+  try {
+    const results = await apiRequest<SearchResult[]>(supabase, "GET", "/api/food-search", { query: { q: query } });
+    return NextResponse.json({ results });
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     }
+    // Fail soft: saved foods still work without USDA results.
+    return NextResponse.json({ results: [] });
   }
-
-  const results = await searchUsda(query);
-  return NextResponse.json({ results });
 }

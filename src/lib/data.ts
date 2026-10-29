@@ -2,84 +2,141 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SectionKey } from "./food-db";
 import type { EntriesBySection } from "./nutrition";
 import { todayStr } from "./nutrition";
-import { apiEnabled, apiRequest } from "./api";
-import * as db from "./db";
-import type {
-  BodyTargetsRow,
-  CustomFoodRow,
-  DayTotals,
-  QuickAddSuggestion,
-  WeightLogRow,
-} from "./db";
+import { apiRequest } from "./api";
 
-// What the pages read. Each function has the same signature as its db.ts
-// twin and either asks the Python API (API_URL set) or queries Supabase
-// directly (the default). The API derives the user from the token, so
-// `userId` is only used on the direct path.
+// What the pages read. Every function asks the Python API (backend/), which
+// takes the user from the forwarded Supabase token; nothing here queries the
+// database directly. The row types below are the API's response shapes.
+
+export interface CustomFoodRow {
+  id: string;
+  name: string;
+  carbs: number;
+  protein: number;
+  fat: number;
+  calories: number;
+  piece_weight: number | null;
+  density: number | null;
+}
+
+export interface BodyTargetsRow {
+  weight_kg: number | null;
+  height_cm: number | null;
+  age: number | null;
+  sex: "male" | "female" | null;
+  activity_level: string | null;
+  goal: "cut" | "maintain" | "bulk" | null;
+  target_calories: number | null;
+  target_protein: number | null;
+  target_carbs: number | null;
+  target_fat: number | null;
+}
+
+export interface QuickAddSuggestion {
+  foodName: string;
+  qty: number;
+  qtyLabel: string;
+  unit: "g" | "pc" | "ml";
+  carbs: number;
+  protein: number;
+  fat: number;
+  calories: number;
+}
+
+export interface DayTotals {
+  date: string;
+  cal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  // True only when the user actually logged at least one entry that day.
+  // A day with nothing logged still gets a zero-filled row (so callers get
+  // one entry per calendar day), but `logged: false` is what distinguishes
+  // "not logged" from "logged and genuinely totaled zero" — callers doing
+  // averages or target-hit counts must filter on this, not on `cal > 0`.
+  logged: boolean;
+}
+
+export interface WeightLogRow {
+  id: string;
+  logged_date: string;
+  weight_kg: number;
+}
 
 const get = <T>(supabase: SupabaseClient, path: string, query?: Record<string, string | number>) =>
   apiRequest<T>(supabase, "GET", path, { query });
 
-export async function getEntriesForDate(supabase: SupabaseClient, userId: string, date: string): Promise<EntriesBySection> {
-  if (!apiEnabled()) return db.getEntriesForDate(supabase, userId, date);
+function pad(n: number): string {
+  return n < 10 ? "0" + n : "" + n;
+}
+
+// The last `days` calendar days ending today, as local-calendar YYYY-MM-DD
+// bounds. Pages use it to name the window they are showing; the API slices
+// the same window from the `today` it is given.
+export function getRangeBounds(days: number): { start: string; end: string } {
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setDate(start.getDate() - (days - 1));
+  const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return { start: fmt(start), end: fmt(end) };
+}
+
+export function getEntriesForDate(supabase: SupabaseClient, date: string): Promise<EntriesBySection> {
   return get(supabase, "/api/day", { date });
 }
 
-export async function getCustomFoods(supabase: SupabaseClient, userId: string): Promise<CustomFoodRow[]> {
-  if (!apiEnabled()) return db.getCustomFoods(supabase, userId);
+export function getCustomFoods(supabase: SupabaseClient): Promise<CustomFoodRow[]> {
   return get(supabase, "/api/custom-foods");
 }
 
-export async function getBodyTargets(supabase: SupabaseClient, userId: string): Promise<BodyTargetsRow | null> {
-  if (!apiEnabled()) return db.getBodyTargets(supabase, userId);
+export function getBodyTargets(supabase: SupabaseClient): Promise<BodyTargetsRow | null> {
   return get(supabase, "/api/body-targets");
 }
 
-export async function getWaterIntake(supabase: SupabaseClient, userId: string, date: string): Promise<number> {
-  if (!apiEnabled()) return db.getWaterIntake(supabase, userId, date);
+export async function getWaterIntake(supabase: SupabaseClient, date: string): Promise<number> {
   return (await get<{ amount_ml: number }>(supabase, "/api/water", { date })).amount_ml;
 }
 
-export async function getStreak(supabase: SupabaseClient, userId: string): Promise<number> {
-  if (!apiEnabled()) return db.getStreak(supabase, userId);
-  // Pass this server's calendar date so both services count from the same day.
+// Consecutive days (ending today or yesterday) with at least one logged
+// entry. This server's calendar date is passed so both services count from
+// the same day.
+export async function getStreak(supabase: SupabaseClient): Promise<number> {
   return (await get<{ streak: number }>(supabase, "/api/streak", { today: todayStr() })).streak;
 }
 
-export async function getQuickAddSuggestions(
+// Recent + frequent foods per meal section, ranked by the API.
+export function getQuickAddSuggestions(
   supabase: SupabaseClient,
-  userId: string,
 ): Promise<Record<SectionKey, QuickAddSuggestion[]>> {
-  if (!apiEnabled()) return db.getQuickAddSuggestions(supabase, userId);
   return get(supabase, "/api/quick-add");
 }
 
-export async function getRecentDailyTotals(supabase: SupabaseClient, userId: string, days: number): Promise<DayTotals[]> {
-  if (!apiEnabled()) return db.getRecentDailyTotals(supabase, userId, days);
+// Per-day totals for the last `days` days (including today), oldest first,
+// with every day present even if nothing was logged (filled with zeros).
+export async function getRecentDailyTotals(supabase: SupabaseClient, days: number): Promise<DayTotals[]> {
   return (await get<{ days: DayTotals[] }>(supabase, "/api/trends", { days, today: todayStr() })).days;
 }
 
-// The API takes a day count ending "today", so the [start, end] window the
-// page computed with getRangeBounds is turned back into that count.
+// Real weigh-ins only, oldest first, no zero-filling. The API takes a day
+// count ending "today", so the [start, end] window the page computed with
+// getRangeBounds is turned back into that count.
 export async function getWeightLogs(
   supabase: SupabaseClient,
-  userId: string,
   startDate: string,
   endDate: string,
 ): Promise<WeightLogRow[]> {
-  if (!apiEnabled()) return db.getWeightLogs(supabase, userId, startDate, endDate);
   const [sy, sm, sd] = startDate.split("-").map(Number);
   const [ey, em, ed] = endDate.split("-").map(Number);
   const days = Math.round((Date.UTC(ey, em - 1, ed) - Date.UTC(sy, sm - 1, sd)) / 86_400_000) + 1;
   return (await get<{ logs: WeightLogRow[] }>(supabase, "/api/weight-logs", { days, today: endDate })).logs;
 }
 
-export async function getMonthTotals(
+// date (YYYY-MM-DD) -> total calories for that day, for the given month
+export function getMonthTotals(
   supabase: SupabaseClient,
-  userId: string,
   year: number,
   month: number, // 0-11
 ): Promise<Record<string, number>> {
-  if (!apiEnabled()) return db.getMonthTotals(supabase, userId, year, month);
   return get(supabase, "/api/month-totals", { year, month });
 }

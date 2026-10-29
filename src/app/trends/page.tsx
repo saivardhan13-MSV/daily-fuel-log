@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRecentDailyTotals, getBodyTargets, getStreak, getWeightLogs } from "@/lib/data";
-import { getRangeBounds } from "@/lib/db";
+import { getRecentDailyTotals, getBodyTargets, getStreak, getWeightLogs, getRangeBounds } from "@/lib/data";
 import Topbar from "@/components/tracker/Topbar";
 import TrendsView from "@/components/tracker/TrendsView";
 import { FooterDisclaimer } from "@/components/tracker/Disclaimer";
@@ -21,10 +20,10 @@ export default async function TrendsPage() {
   const { start, end } = getRangeBounds(RANGE_DAYS);
 
   const [days, targets, streak, weightLogs] = await Promise.all([
-    getRecentDailyTotals(supabase, user.id, RANGE_DAYS),
-    getBodyTargets(supabase, user.id),
-    getStreak(supabase, user.id),
-    getWeightLogs(supabase, user.id, start, end),
+    getRecentDailyTotals(supabase, RANGE_DAYS),
+    getBodyTargets(supabase),
+    getStreak(supabase),
+    getWeightLogs(supabase, start, end),
   ]);
 
   return (

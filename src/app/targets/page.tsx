@@ -14,8 +14,8 @@ export default async function TargetsPage() {
   if (!user) redirect("/login");
 
   const [targets, streak] = await Promise.all([
-    getBodyTargets(supabase, user.id),
-    getStreak(supabase, user.id),
+    getBodyTargets(supabase),
+    getStreak(supabase),
   ]);
 
   const hasTargets = targets?.target_calories != null;

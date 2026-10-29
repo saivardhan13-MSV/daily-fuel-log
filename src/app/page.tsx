@@ -36,12 +36,12 @@ export default async function Home(props: PageProps<"/">) {
   if (!user) redirect("/login");
 
   const [entries, customFoods, targets, waterMl, streak, quickAdd] = await Promise.all([
-    getEntriesForDate(supabase, user.id, date),
-    getCustomFoods(supabase, user.id),
-    getBodyTargets(supabase, user.id),
-    getWaterIntake(supabase, user.id, date),
-    getStreak(supabase, user.id),
-    getQuickAddSuggestions(supabase, user.id),
+    getEntriesForDate(supabase, date),
+    getCustomFoods(supabase),
+    getBodyTargets(supabase),
+    getWaterIntake(supabase, date),
+    getStreak(supabase),
+    getQuickAddSuggestions(supabase),
   ]);
 
   const totals = totalsForEntries(entries);

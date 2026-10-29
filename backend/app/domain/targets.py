@@ -1,5 +1,7 @@
 """Calorie and macro targets from body inputs (Mifflin-St Jeor).
-Mirrors src/lib/targets.ts."""
+Ported from the app's original TypeScript implementation (removed once this
+API took over); tests/fixtures/ts_target_parity.json holds outputs captured from
+that code."""
 
 from __future__ import annotations
 

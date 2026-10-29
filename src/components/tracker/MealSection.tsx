@@ -1,6 +1,6 @@
 import type { SectionConfig } from "@/lib/food-db";
 import { round1, totalsForItems, type EntryItem } from "@/lib/nutrition";
-import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
+import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/data";
 import ItemsList from "./ItemsList";
 import AddItemRow from "./AddItemRow";
 import CopyPreviousMeal from "./CopyPreviousMeal";

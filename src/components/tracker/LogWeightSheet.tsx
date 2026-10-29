@@ -3,7 +3,7 @@
 import { useState, type RefObject } from "react";
 import { logWeight, updateWeightLog } from "@/app/actions/weight";
 import { todayStr } from "@/lib/nutrition";
-import type { WeightLogRow } from "@/lib/db";
+import type { WeightLogRow } from "@/lib/data";
 import CopySheet from "./CopySheet";
 
 export default function LogWeightSheet({

@@ -9,7 +9,7 @@ import {
   type Goal,
   type Sex,
 } from "@/lib/targets";
-import type { BodyTargetsRow } from "@/lib/db";
+import type { BodyTargetsRow } from "@/lib/data";
 
 const ACTIVITY_LEVELS = Object.keys(ACTIVITY_LABELS) as ActivityLevel[];
 

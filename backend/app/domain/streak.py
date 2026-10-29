@@ -1,4 +1,5 @@
-"""Logging streak. Mirrors getStreak in src/lib/db.ts."""
+"""Logging streak: consecutive days, ending today or yesterday, with at least
+one logged entry. (Ported from the app's original TypeScript getStreak.)"""
 
 from __future__ import annotations
 

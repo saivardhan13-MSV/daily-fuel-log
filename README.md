@@ -1,3 +1,30 @@
+# Daily Fuel Log
+
+A daily food, hydration and body-weight tracker. The UI is Next.js; all data
+access goes through a Python (FastAPI) API in [`backend/`](backend/README.md),
+backed by Supabase (auth + Postgres with Row Level Security).
+
+```
+Browser -> Next.js (UI, login, session cookie) -> FastAPI (backend/) -> Supabase Postgres (RLS)
+```
+
+**Running locally needs both servers.** Copy `.env.local.example` to
+`.env.local`, set `API_URL=http://localhost:8010`, then:
+
+```bash
+# terminal 1: the API
+cd backend && python -m venv .venv && .venv/Scripts/activate && pip install -r requirements-dev.txt
+uvicorn app.main:app --port 8010
+
+# terminal 2: the app
+npm install && npm run dev
+```
+
+(Or point `API_URL` at the deployed API and skip terminal 1.) API details,
+tests and Vercel deployment: [`backend/README.md`](backend/README.md).
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

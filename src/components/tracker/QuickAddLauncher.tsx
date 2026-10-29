@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { SECTIONS, inferSectionForTime, type SectionKey } from "@/lib/food-db";
-import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/db";
+import type { CustomFoodRow, QuickAddSuggestion } from "@/lib/data";
 import AddItemRow from "./AddItemRow";
 
 function prefersReducedMotion(): boolean {

@@ -30,9 +30,9 @@ export default async function HistoryPage(props: PageProps<"/history">) {
   if (!user) redirect("/login");
 
   const [totals, streak, targets] = await Promise.all([
-    getMonthTotals(supabase, user.id, year, month),
-    getStreak(supabase, user.id),
-    getBodyTargets(supabase, user.id),
+    getMonthTotals(supabase, year, month),
+    getStreak(supabase),
+    getBodyTargets(supabase),
   ]);
   const today = todayStr();
   const targetCalories = targets?.target_calories ?? null;
